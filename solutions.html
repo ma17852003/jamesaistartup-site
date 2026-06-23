@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>合作方案詳情｜AI 自動化顧問 James Wu</title>
+<meta name="description" content="James Wu AI 自動化導入的 3 種合作方案：從 1 個 AI 員工的入門方案，到完整 AI 行政部。看每個方案包含什麼、適合誰、怎麼交付，依需求客製專屬報價。">
+<link rel="canonical" href="https://jamesaistartup.github.io/solutions.html">
+<meta property="og:title" content="合作方案詳情｜AI 自動化顧問 James Wu">
+<meta property="og:description" content="3 種方式幫你的公司請 AI 員工，從入門到完整 AI 行政部。依需求客製專屬報價。">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Noto+Sans+TC:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080812; --card:#0f0f20; --border:#1a1a3a;
+  --accent:#6c63ff; --accent2:#00d4ff; --gold:#fbbf24; --green:#10b981;
+  --text:#f0f0ff; --muted:#6b6b99; --light:#c8c8f0;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Inter','Noto Sans TC',sans-serif;line-height:1.6;}
+a{color:inherit;text-decoration:none;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(8,8,18,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-weight:900;font-size:16px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px;}
+.nav-links{display:flex;gap:28px;align-items:center;}
+.nav-links a{font-size:13px;color:var(--muted);font-weight:500;transition:color .2s;}
+.nav-links a:hover{color:var(--text);}
+.nav-cta{background:var(--accent);color:#fff;padding:8px 20px;border-radius:8px;font-size:13px;font-weight:700;transition:opacity .2s;}
+.nav-cta:hover{opacity:.85;}
+@media(max-width:768px){.nav-links a.hide-m{display:none;}}
+
+/* HEADER */
+.page-head{max-width:900px;margin:0 auto;padding:140px 24px 0;text-align:center;}
+.section-tag{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:12px;}
+.page-head h1{font-size:clamp(32px,5vw,52px);font-weight:900;line-height:1.15;letter-spacing:-1px;margin-bottom:16px;}
+.page-head h1 .grad{background:linear-gradient(135deg,#fff 30%,var(--accent) 70%,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.page-head p{font-size:17px;color:var(--muted);max-width:620px;margin:0 auto;line-height:1.7;}
+
+/* PLAN BLOCKS */
+.plans{max-width:1080px;margin:0 auto;padding:70px 24px 0;display:flex;flex-direction:column;gap:24px;}
+.plan-block{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px;display:grid;grid-template-columns:300px 1fr;gap:40px;position:relative;overflow:hidden;}
+.plan-block::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.plan-block.p1::before{background:linear-gradient(90deg,var(--accent),var(--accent2));}
+.plan-block.p2::before{background:linear-gradient(90deg,var(--green),var(--accent2));}
+.plan-block.p3::before{background:linear-gradient(90deg,var(--gold),#f97316);}
+.plan-block.featured{border-color:rgba(108,99,255,0.45);box-shadow:0 0 40px rgba(108,99,255,0.12);}
+.plan-icon{font-size:34px;margin-bottom:14px;}
+.plan-name{font-size:23px;font-weight:900;margin-bottom:4px;}
+.plan-name-tw{font-size:13px;color:var(--muted);margin-bottom:18px;}
+.badge-pop{display:inline-block;background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.4);color:#a89fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:100px;margin-bottom:14px;}
+.plan-meta{font-size:13px;color:var(--light);margin-bottom:8px;display:flex;gap:8px;}
+.plan-meta b{color:var(--accent2);font-weight:700;}
+.plan-suit{font-size:13px;color:var(--muted);line-height:1.7;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;}
+.plan-suit strong{color:var(--light);display:block;margin-bottom:4px;font-size:12px;}
+.plan-includes h4{font-size:13px;color:var(--accent);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase;}
+.inc-list{list-style:none;display:flex;flex-direction:column;gap:11px;}
+.inc-list li{font-size:14px;color:var(--light);display:flex;gap:10px;line-height:1.5;}
+.inc-list li::before{content:'✓';color:var(--green);font-weight:900;flex-shrink:0;}
+.plan-eg{margin-top:20px;background:rgba(108,99,255,0.06);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:12.5px;color:var(--muted);}
+.plan-eg b{color:var(--light);}
+@media(max-width:768px){.plan-block{grid-template-columns:1fr;gap:24px;padding:28px;}}
+
+/* PROCESS */
+.process{max-width:1080px;margin:0 auto;padding:90px 24px 0;}
+.section-title{font-size:clamp(26px,4vw,40px);font-weight:900;line-height:1.15;margin-bottom:14px;text-align:center;}
+.section-sub{font-size:15px;color:var(--muted);text-align:center;max-width:560px;margin:0 auto 48px;}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+.step{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px 22px;text-align:center;}
+.step-num{font-size:13px;font-weight:900;color:var(--accent);margin-bottom:10px;}
+.step-icon{font-size:30px;margin-bottom:12px;}
+.step-t{font-size:15px;font-weight:800;margin-bottom:8px;}
+.step-d{font-size:12.5px;color:var(--muted);line-height:1.6;}
+@media(max-width:768px){.steps{grid-template-columns:1fr 1fr;}}
+
+/* WHY */
+.why{max-width:1080px;margin:0 auto;padding:90px 24px 0;}
+.why-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-top:48px;}
+.why-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px;}
+.why-icon{font-size:28px;margin-bottom:12px;}
+.why-t{font-size:15px;font-weight:800;margin-bottom:6px;}
+.why-d{font-size:13px;color:var(--muted);line-height:1.65;}
+
+/* FAQ */
+.faq{max-width:860px;margin:0 auto;padding:90px 24px 0;}
+.faq-list{display:flex;flex-direction:column;gap:14px;margin-top:48px;}
+.faq-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px 26px;}
+.faq-q{font-size:16px;font-weight:800;margin-bottom:10px;}
+.faq-a{font-size:14px;color:var(--muted);line-height:1.75;}
+
+/* CTA */
+.cta{text-align:center;padding:100px 24px;background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(108,99,255,0.12) 0%,transparent 70%);margin-top:60px;}
+.cta h2{font-size:clamp(28px,4vw,44px);font-weight:900;margin-bottom:14px;}
+.cta p{font-size:16px;color:var(--muted);margin-bottom:36px;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;padding:16px 40px;border-radius:10px;font-weight:700;font-size:16px;display:inline-block;transition:transform .2s,box-shadow .2s;box-shadow:0 0 30px rgba(108,99,255,0.3);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(108,99,255,0.5);}
+.btn-secondary{background:transparent;border:1.5px solid var(--border);color:var(--light);padding:14px 32px;border-radius:10px;font-weight:600;font-size:15px;display:inline-block;transition:border-color .2s;}
+.btn-secondary:hover{border-color:var(--accent);}
+
+footer{background:var(--card);border-top:1px solid var(--border);padding:32px;text-align:center;font-size:13px;color:var(--muted);margin-top:0;}
+footer strong{color:var(--light);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">@jamesaistartup</a>
+  <div class="nav-links">
+    <a href="index.html" class="hide-m">← 回首頁</a>
+    <a href="index.html#cases" class="hide-m">實戰案例</a>
+    <a href="mailto:infernoedge247365@gmail.com?subject=AI 自動化諮詢" class="nav-cta">📧 預約諮詢</a>
+  </div>
+</nav>
+
+<!-- HEADER -->
+<div class="page-head">
+  <div class="section-tag">// 合作方案</div>
+  <h1>3 種方式，<span class="grad">幫你的公司請 AI 員工</span></h1>
+  <p>從 1 個 AI 員工開始，到整個 AI 行政部 —— 依你的規模選擇，隨業務無痛擴編。下面是每個方案實際包含什麼、適合誰、怎麼交付。</p>
+</div>
+
+<!-- PLANS -->
+<div class="plans">
+
+  <!-- 入門 -->
+  <div class="plan-block p1">
+    <div class="plan-head">
+      <div class="plan-icon">🤖</div>
+      <div class="plan-name">入門・1 個 AI 員工</div>
+      <div class="plan-name-tw">先讓一個 AI 員工上工</div>
+      <div class="plan-meta">⚡ <b>2 週</b> 快速上線</div>
+      <div class="plan-suit"><strong>適合誰</strong>第一次導入、單一痛點明確、想先看到成果再擴編的公司。</div>
+    </div>
+    <div class="plan-includes">
+      <h4>方案包含</h4>
+      <ul class="inc-list">
+        <li>挑你<b>最痛的 1 個流程</b>全自動化</li>
+        <li>LINE 隨身操作，員工零學習成本</li>
+        <li>每月維護 ＋ 持續優化</li>
+        <li>系統壞掉我修，含在月費</li>
+        <li>90 天成效保證</li>
+      </ul>
+      <div class="plan-eg">💡 <b>常見起點：</b>發票自動讀取入帳 · 報價單自動生成 · 出勤自動統計</div>
+    </div>
+  </div>
+
+  <!-- 標配 -->
+  <div class="plan-block p2 featured">
+    <div class="plan-head">
+      <div class="badge-pop">⭐ 最多人選</div>
+      <div class="plan-icon">🤖🤖🤖</div>
+      <div class="plan-name">標配・AI 行政小組</div>
+      <div class="plan-name-tw">涵蓋主要行政痛點</div>
+      <div class="plan-meta">⚡ <b>3–4 週</b> 上線</div>
+      <div class="plan-suit"><strong>適合誰</strong>行政重複工作多、想一次解決主要痛點的中小企業（多數人的甜蜜點）。</div>
+    </div>
+    <div class="plan-includes">
+      <h4>方案包含</h4>
+      <ul class="inc-list">
+        <li><b>3 個流程</b>一次到位（發票＋報價＋出勤報表）</li>
+        <li>LINE 操作 ＋ 自動通知（缺件、逾期主動提醒）</li>
+        <li>每月「省時報表」，ROI 看得見</li>
+        <li>每月維護 ＋ 持續優化</li>
+        <li>90 天成效保證</li>
+      </ul>
+      <div class="plan-eg">💡 <b>把整組行政重複工作</b>交給 AI 行政小組，老闆和行政人員專注在真正要動腦的事。</div>
+    </div>
+  </div>
+
+  <!-- 全包 -->
+  <div class="plan-block p3">
+    <div class="plan-head">
+      <div class="plan-icon">🏢</div>
+      <div class="plan-name">全包・AI 行政部</div>
+      <div class="plan-name-tw">完整取代行政人力</div>
+      <div class="plan-meta">⚙️ <b>分階段</b> 導入</div>
+      <div class="plan-suit"><strong>適合誰</strong>多公司／多部門、想完整取代行政人力、老闆要專心衝業務的企業。</div>
+    </div>
+    <div class="plan-includes">
+      <h4>方案包含</h4>
+      <ul class="inc-list">
+        <li><b>5＋ 流程</b>全自動化</li>
+        <li>老闆專屬管理儀表板（營運數字一眼看完）</li>
+        <li>多公司／多部門資料分流</li>
+        <li>專屬維護 ＋ 優先支援</li>
+        <li>90 天成效保證</li>
+      </ul>
+      <div class="plan-eg">💡 <b>一整個 AI 行政部</b>，把重複行政全包走，老闆把時間還給業務和決策。</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- PROCESS -->
+<div class="process">
+  <div class="section-title">從聊聊到上線，<br>只要 4 步</div>
+  <div class="section-sub">不綁約、不催單。先聊清楚值不值得做，再決定。</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">STEP 1</div><div class="step-icon">🗣️</div><div class="step-t">免費諮詢</div><div class="step-d">了解你的流程，幫你抓出最值得先自動化的一塊。</div></div>
+    <div class="step"><div class="step-num">STEP 2</div><div class="step-icon">📐</div><div class="step-t">規劃報價</div><div class="step-d">量身設計方案，給你專屬報價。聽完再決定，不勉強。</div></div>
+    <div class="step"><div class="step-num">STEP 3</div><div class="step-icon">⚙️</div><div class="step-t">建置交付</div><div class="step-d">2–6 週上線，過程拍給你看，員工 LINE 上手即用。</div></div>
+    <div class="step"><div class="step-num">STEP 4</div><div class="step-icon">✅</div><div class="step-t">90 天保證</div><div class="step-d">沒看到可量化成效，我免費做到有為止。</div></div>
+  </div>
+</div>
+
+<!-- WHY -->
+<div class="why">
+  <div class="section-title">為什麼找我做</div>
+  <div class="why-grid">
+    <div class="why-card"><div class="why-icon">🏗️</div><div class="why-t">做的是「系統」不是腳本</div><div class="why-d">不是自動化一個動作，而是重新設計你的行政流程，讓重複工作減少 30–60%。</div></div>
+    <div class="why-card"><div class="why-icon">🔒</div><div class="why-t">跟你一起扛結果</div><div class="why-d">90 天成效保證，沒看到改善免費做到有；沒成果，不收尾款。</div></div>
+    <div class="why-card"><div class="why-icon">🎯</div><div class="why-t">一條龍一個窗口</div><div class="why-d">規劃、建置、維護、優化都是我，不用對接一堆廠商。</div></div>
+    <div class="why-card"><div class="why-icon">📱</div><div class="why-t">0 程式碼・員工零學習</div><div class="why-d">老闆和行政只要會用 LINE、填表單，重複工作交給 AI 員工。</div></div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq">
+  <div class="section-title">關於方案，<br>你可能想問</div>
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q">我該從哪個方案開始？</div>
+      <div class="faq-a">不確定就從「入門・1 個 AI 員工」起，先用一個流程看到成果再擴編；如果行政痛點已經很多，直接「標配・AI 行政小組」最划算。聊一次，我幫你判斷。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">之後可以擴編嗎？</div>
+      <div class="faq-a">可以，方案本來就設計成隨業務無痛擴編——從 1 個 AI 員工，慢慢長成一整個 AI 行政部，前面建好的不會白做。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">這要多少錢？</div>
+      <div class="faq-a">依公司規模與流程數量客製，落差不小，與其報一個用猜的數字，我更想先了解你的狀況。重點不是花多少，是省回多少：一個 10 人行政團隊若 40% 時間做重複工，一年就浪費約 NT$240 萬。聊聊，我給你專屬報價。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">多久能看到成效？</div>
+      <div class="faq-a">通常 2–6 週交付可用系統，90 天內看到可量化成效（省下的工時、減少的錯誤）。沒看到改善，我免費做到有。</div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta">
+  <h2>想知道哪個方案<br>適合你的公司？</h2>
+  <p>花 30 分鐘聊聊你的流程，我幫你抓出最值得先自動化的一塊，再給你專屬報價。</p>
+  <a href="mailto:infernoedge247365@gmail.com?subject=AI 自動化諮詢&body=你好 James，%0A%0A我看了合作方案，想了解哪個適合我的公司。%0A%0A公司在做：%0A最想解決的重複工作：%0A%0A謝謝" class="btn-primary">📧 預約免費諮詢</a>
+  <div style="margin-top:18px;"><a href="index.html" class="btn-secondary">← 回首頁</a></div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <strong>James Wu · @jamesaistartup</strong><br>
+  AI 自動化系統顧問 · 台灣<br>
+  <span style="margin-top:8px;display:block;">© 2026 James Wu · infernoedge247365@gmail.com</span>
+</footer>
+
+</body>
+</html>
