@@ -5,6 +5,10 @@
 (function () {
   var CN_COUNTRIES = ['CN', 'TW', 'HK', 'MO', 'SG'];
   var STORAGE_KEY = 'jws_lang';
+  // Set true the moment a language is authoritatively decided (manual click, geo result,
+  // or fallback timeout) so a late-arriving geo response can never clobber a manual choice
+  // the visitor made while detection was still in flight.
+  var settled = false;
 
   function fallbackLang() {
     var nav = (navigator.language || navigator.userLanguage || '').toLowerCase();
@@ -39,6 +43,7 @@
   }
 
   function setLang(lang, persist) {
+    settled = true; // a manual choice always wins over any pending geo lookup
     if (persist) {
       try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
     }
@@ -72,7 +77,6 @@
     }
 
     mountToggle('zh');
-    var settled = false;
     var timer = setTimeout(function () {
       if (settled) return;
       settled = true;
