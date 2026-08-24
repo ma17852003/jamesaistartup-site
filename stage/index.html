@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>導入 AI 的六個段位 — 自我檢核表｜James Wu AI 造王者</title>
+<meta name="description" content="給老闆的 5 分鐘自評。照著勾，你會知道自己卡在哪一段、以及下一步該做什麼。大部分老闆卡在第 2 段，而且以為自己在第 4 段。">
+<meta property="og:title" content="導入 AI 的六個段位 — 自我檢核表">
+<meta property="og:description" content="5 分鐘自評：你的公司卡在第幾段？大部分老闆卡在第 2 段，而且以為自己在第 4 段。">
+<meta property="og:type" content="website">
+<style>
+:root{
+  --bg:#0E1116; --card:#161B22; --card2:#1C222B; --line:#262E3A;
+  --ink:#E8EDF3; --ink2:#A3AFBE; --ink3:#6E7C8D;
+  --gold:#D4A24C; --gold-dim:#3A2E14;
+  --red:#E5654F; --red-dim:#331712;
+  --ok:#4FBE84;
+  --mono:ui-monospace,SFMono-Regular,Consolas,monospace;
+  --sans:system-ui,-apple-system,"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.7;font-size:16px}
+.wrap{max-width:680px;margin:0 auto;padding:0 18px 120px}
+
+header{padding:44px 0 26px;border-bottom:1px solid var(--line)}
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:12px}
+h1{font-size:clamp(25px,6vw,34px);line-height:1.25;margin:0 0 14px;font-weight:800;letter-spacing:-.02em}
+.sub{color:var(--ink2);font-size:15px;margin:0}
+.by{font-family:var(--mono);font-size:12px;color:var(--ink3);margin-top:16px}
+
+.how{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:26px 0}
+.how p{margin:0 0 8px;font-size:14.5px;color:var(--ink2)}
+.how p:last-child{margin:0}
+.how b{color:var(--ink)}
+.how .warn{color:var(--gold);font-weight:700}
+
+/* progress */
+.prog{position:sticky;top:0;z-index:20;background:rgba(14,17,22,.94);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);padding:11px 0;margin:0 -18px 0;padding-left:18px;padding-right:18px}
+.prog-row{display:flex;align-items:center;gap:10px;max-width:644px;margin:0 auto}
+.prog-bar{flex:1;height:5px;background:var(--card2);border-radius:99px;overflow:hidden}
+.prog-bar span{display:block;height:100%;width:0;background:var(--gold);border-radius:99px;transition:width .3s}
+.prog-txt{font-family:var(--mono);font-size:12px;color:var(--ink3);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* stage */
+.stage{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;margin:16px 0}
+.stage.hot{border-color:var(--gold)}
+.stage-hd{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.stage-n{font-family:var(--mono);font-size:12px;color:var(--gold);font-weight:700;letter-spacing:.08em}
+.stage-t{font-size:19px;font-weight:800;letter-spacing:-.01em}
+.stage-flag{font-size:11px;background:var(--gold-dim);color:var(--gold);padding:3px 9px;border-radius:99px;font-weight:700}
+.sym{color:var(--ink2);font-size:14.5px;margin:0 0 16px}
+.sym b{color:var(--ink)}
+
+label.chk{display:flex;gap:12px;align-items:flex-start;padding:11px 13px;border-radius:8px;cursor:pointer;
+  background:var(--card2);border:1px solid transparent;margin-bottom:8px;transition:border-color .15s,background .15s}
+label.chk:hover{border-color:var(--line)}
+label.chk:has(input:checked){border-color:var(--ok);background:#0F2018}
+label.chk input{appearance:none;width:21px;height:21px;flex:0 0 21px;margin-top:1px;border:2px solid var(--ink3);
+  border-radius:5px;cursor:pointer;position:relative;background:transparent}
+label.chk input:checked{background:var(--ok);border-color:var(--ok)}
+label.chk input:checked::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;
+  border:solid #0E1116;border-width:0 2.5px 2.5px 0;transform:rotate(42deg)}
+label.chk input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+label.chk span{font-size:14.5px;line-height:1.6}
+label.chk b{color:var(--ink)}
+
+.note{font-size:13.5px;color:var(--ink2);margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.note .lbl{color:var(--gold);font-weight:700}
+.note .next{color:var(--ok);font-weight:700}
+
+/* result */
+#result{display:none;position:sticky;bottom:0;z-index:30;padding:20px 18px 24px;
+  background:linear-gradient(180deg,rgba(14,17,22,0) 0%,rgba(14,17,22,.97) 22%,#0E1116 100%)}
+#result.show{display:block}
+.res-card{max-width:644px;margin:0 auto;background:var(--card);border:2px solid var(--gold);border-radius:14px;padding:22px}
+.res-lead{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
+.res-big{font-size:27px;font-weight:800;line-height:1.3;margin-bottom:10px}
+.res-big em{font-style:normal;color:var(--gold)}
+.res-say{font-size:14.5px;color:var(--ink2);margin-bottom:14px}
+.res-do{background:var(--card2);border-radius:9px;padding:14px 16px;margin-bottom:18px}
+.res-do .k{font-size:11.5px;font-family:var(--mono);color:var(--ok);letter-spacing:.08em;margin-bottom:5px}
+.res-do .v{font-size:15px;font-weight:700}
+.cta{display:block;background:var(--gold);color:#12161C;text-align:center;font-weight:800;font-size:16px;
+  padding:15px;border-radius:10px;text-decoration:none}
+.cta:hover{filter:brightness(1.08)}
+.cta-sub{text-align:center;font-size:12.5px;color:var(--ink3);margin-top:10px;line-height:1.6}
+
+.closing{background:var(--card);border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:18px 20px;margin:26px 0}
+.closing h3{margin:0 0 8px;font-size:16px;color:var(--gold)}
+.closing p{margin:0 0 8px;font-size:14.5px;color:var(--ink2)}
+.closing p:last-child{margin:0}
+.closing b{color:var(--ink)}
+
+footer{border-top:1px solid var(--line);margin-top:32px;padding-top:20px;font-size:12.5px;color:var(--ink3);line-height:1.9}
+footer a{color:var(--gold);text-decoration:none}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">給老闆的 5 分鐘自評</div>
+  <h1>導入 AI 的六個段位<br>自我檢核表</h1>
+  <p class="sub">照著勾，你會知道自己卡在哪一段、以及下一步該做什麼。</p>
+  <div class="by">James Wu｜AI 造王者・中小企業 AI 轉型</div>
+</header>
+
+<div class="how">
+  <p>每段位下面有 <b>3 個檢核點</b>。<b>三個全勾才算通過那一段。</b></p>
+  <p>從第 1 段往下勾，<b>第一個沒全勾的地方就是你現在的位置</b>。</p>
+  <p class="warn">大部分老闆卡在第 2 段 —— 而且他們以為自己在第 4 段。</p>
+</div>
+
+<div class="prog">
+  <div class="prog-row">
+    <div class="prog-bar"><span id="pbar"></span></div>
+    <div class="prog-txt" id="ptxt">0 / 18</div>
+  </div>
+</div>
+
+<div id="stages"></div>
+
+<div class="closing">
+  <h3>一個誠實的提醒</h3>
+  <p>這張表沒有「買什麼工具」那一欄，是故意的。</p>
+  <p>段位 2 之所以是最大的塞車點，就是因為<b>工具太好買了</b>。從段位 2 到段位 3 的距離，不是再買一個工具，而是<b>選一條流程，把它做到不需要你</b>。</p>
+</div>
+
+<footer>
+  本檢核表為經驗分享，不同產業與規模適用程度不同，請依自身狀況判斷。<br>
+  James Wu｜AI 造王者　LINE <a href="https://line.me/R/ti/p/@826wdyra">@826wdyra</a>
+</footer>
+
+</div>
+
+<div id="result">
+  <div class="res-card">
+    <div class="res-lead">你的位置</div>
+    <div class="res-big">你在 <em id="rNum">第 1 段</em><span id="rName"></span></div>
+    <div class="res-say" id="rSay"></div>
+    <div class="res-do">
+      <div class="k">最該做的一件事</div>
+      <div class="v" id="rDo"></div>
+    </div>
+    <a class="cta" id="rCta" href="https://line.me/R/ti/p/@826wdyra">把「<span id="rNumShort">1</span>」傳到我的 LINE →</a>
+    <div class="cta-sub">傳一個數字就好。<br>我告訴你這一段最常見的死法，以及下一步該做哪一件事。</div>
+  </div>
+</div>
+
+<script>
+const DATA = [
+  { n:1, name:"會問", sym:"AI 是一個你<b>會想到就打開</b>的網站。",
+    items:["我會用 AI 寫文案／回信／整理會議紀錄","我知道問得清楚，答案就會比較好","我一週至少用它 3 次"],
+    why:"這一段的產出<b>不會累積</b>。你今天問的東西，明天要重新問一次。",
+    next:"把你最常問的那 3 件事寫成固定的問法，存起來。",
+    say:"你已經比大多數人前面。但這一段的產出不會累積——今天問過的，明天還要重問一次。",
+    doit:"把最常問的 3 件事寫成固定問法，存起來。" },
+  { n:2, name:"有買，但沒人用", flag:"🔴 大部分人卡這裡", hot:true,
+    sym:"帳單上有一排訂閱，但<b>公司裡沒人打開</b>。",
+    items:["我知道公司現在付了哪幾個 AI／SaaS 月費（<b>講得出名字和金額</b>）","每一個都至少有一個人每週真的在用","停掉任何一個，會有人來找我抗議"],
+    why:"買工具是一次性決定，用工具是每天的決定。工具沒有嵌進原本的流程裡，它就永遠是「還要多開一個東西」。",
+    next:"先砍，不要再買。把沒人用的停掉，錢和注意力放到段位 3 的那一條流程上。",
+    say:"這是最貴的一段：錢花了、工具買了、人不用。等於請了一個天天在辦公室睡覺的員工，薪水照付。",
+    doit:"先砍，不要再買。把沒人用的停掉。" },
+  { n:3, name:"有一條真的自己在跑",
+    sym:"有一件事，你已經<b>不記得上次自己做是什麼時候</b>。",
+    items:["至少有一條流程，<b>不需要有人按開始</b>就會跑","它壞掉的時候，我會知道（有通知，不是等客戶抱怨）","它做的事，如果改回人工，我會很痛"],
+    why:"這是真正的分水嶺。你從「用工具」變成「有系統」。",
+    next:"不要急著加第二條。先讓這一條穩定跑一個月。",
+    say:"有一條真的在跑，你已經贏過八成的老闆。接下來會卡在同一個地方：那條線是孤島。",
+    doit:"不要急著加第二條。先讓這一條穩定跑一個月。" },
+  { n:4, name:"流程會互相觸發",
+    sym:"一件事發生，<b>後面三件事自動接上</b>。",
+    items:["有一條流程的結束，是另一條流程的開始（不用人轉手）","資料只輸入一次，多個地方同時更新","我能畫出這些流程怎麼串的（<b>畫不出來就是還沒到</b>）"],
+    why:"這一段最容易假通過。很多人以為自己在這，其實是「有很多條各跑各的」——<b>互相觸發</b>才算。",
+    next:"找出目前還要「人工搬資料」的那個接縫，把它接起來。",
+    say:"會互相觸發了，那你缺的不是再多一條線，是有人幫你看整盤。",
+    doit:"找出還要人工搬資料的那個接縫，接起來。" },
+  { n:5, name:"系統會記得上次的決定",
+    sym:"你<b>不用重複交代</b>同一件事。",
+    items:["系統記得客戶偏好／過去的決策，下次自動套用","踩過的坑有記錄，同一個錯不會犯第二次","新人接手時，看記錄就能上手（不是靠問老員工）"],
+    why:"前四段是把「動作」自動化，這一段是把「判斷」累積起來。多數公司到這裡就停了，因為它不像功能，看不見。",
+    next:"先做最小版本 —— 一個所有人都會寫、也都會看的決策記錄。",
+    say:"你已經走到多數公司到不了的地方。判斷的累積比動作的自動化難十倍。",
+    doit:"建一個所有人都會寫、也都會看的決策記錄。" },
+  { n:6, name:"你只看報表",
+    sym:"你的角色從「執行」變成<b>「決定要不要繼續」</b>。",
+    items:["我每天花在營運雜事上的時間 <b>少於 30 分鐘</b>","我看的是結果數字，不是過程細節","我請假一週，公司照跑（<b>而且我敢真的試</b>）"],
+    why:"到這裡的意義：你買回了自己的時間。這才是導入 AI 的目的 —— 不是「用了 AI」，是「你不用做了」。",
+    next:"恭喜。去想下一個生意。",
+    say:"你自由了。這一段之後，我這種外面的人幫不上最多忙。",
+    doit:"恭喜。去想下一個生意。" }
+];
+
+const host = document.getElementById('stages');
+host.innerHTML = DATA.map(s => `
+  <div class="stage${s.hot?' hot':''}">
+    <div class="stage-hd">
+      <span class="stage-n">段位 ${s.n}</span>
+      <span class="stage-t">${s.name}</span>
+      ${s.flag?`<span class="stage-flag">${s.flag}</span>`:''}
+    </div>
+    <p class="sym">${s.sym}</p>
+    ${s.items.map((t,i)=>`<label class="chk"><input type="checkbox" data-s="${s.n}" data-i="${i}"><span>${t}</span></label>`).join('')}
+    <div class="note">
+      <span class="lbl">為什麼卡住｜</span>${s.why}<br>
+      <span class="next">下一步｜</span>${s.next}
+    </div>
+  </div>`).join('');
+
+const boxes = [...document.querySelectorAll('.chk input')];
+const bar = document.getElementById('pbar'), ptxt = document.getElementById('ptxt');
+const res = document.getElementById('result');
+
+function evaluate(){
+  const done = boxes.filter(b=>b.checked).length;
+  bar.style.width = (done/boxes.length*100)+'%';
+  ptxt.textContent = done + ' / ' + boxes.length;
+
+  // 第一個沒有全勾的段位 = 你的位置
+  let at = 7;
+  for(const s of DATA){
+    const all = boxes.filter(b=>+b.dataset.s===s.n).every(b=>b.checked);
+    if(!all){ at = s.n; break; }
+  }
+  // 一格都沒勾 → 先不顯示結果，讓人先動手
+  if(done === 0){ res.classList.remove('show'); return; }
+
+  const cur = at <= 6 ? DATA[at-1] : DATA[5];
+  const label = at <= 6 ? ('第 ' + at + ' 段') : '第 6 段（已全數通過）';
+  document.getElementById('rNum').textContent = label;
+  document.getElementById('rName').textContent = at <= 6 ? ('｜' + cur.name) : '';
+  document.getElementById('rSay').textContent = cur.say;
+  document.getElementById('rDo').textContent = cur.doit;
+  document.getElementById('rNumShort').textContent = at <= 6 ? at : 6;
+  res.classList.add('show');
+}
+boxes.forEach(b=>b.addEventListener('change', evaluate));
+evaluate();
+</script>
+</body>
+</html>
