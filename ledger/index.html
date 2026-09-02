@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>漏客自查帳本｜你的店每個月漏掉多少錢 — James Wu・AI 造王者</title>
+<meta name="description" content="填 7 個數字，算出你的店每個月從哪裡漏掉客人與營收。六個大部分老闆沒算到的漏水點，附每一條的補法。免費，不用留資料。">
+<meta property="og:title" content="漏客自查帳本｜你的店每個月漏掉多少錢">
+<meta property="og:description" content="填 7 個數字，算出六個漏水點各漏多少。成交率你自己調，不灌水。">
+<meta property="og:type" content="website">
+<style>
+:root{
+  --bg:#0E1116; --card:#161B22; --ink:#E8EDF3; --line:#262E3A;
+  --gold:#D4A24C; --gold-dim:#3A2E14; --ok:#4FBE84; --red:#E5654F; --red-dim:#331712;
+  --sans:system-ui,-apple-system,"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Consolas,monospace;
+  --dim:#8A97A8;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  -webkit-text-size-adjust:100%}
+body{line-height:1.75}
+.wrap{max-width:760px;margin:0 auto;padding:40px 20px 80px}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.18em;color:var(--gold);
+  text-transform:uppercase;margin-bottom:14px}
+h1{font-size:clamp(28px,6vw,40px);line-height:1.25;margin:0 0 14px;letter-spacing:-.01em}
+.sub{color:var(--dim);font-size:17px;margin:0 0 10px}
+.by{font-family:var(--mono);font-size:12px;color:var(--dim);margin-bottom:30px}
+
+.how{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:20px 22px;margin-bottom:14px}
+.how p{margin:0 0 10px}
+.how p:last-child{margin-bottom:0}
+.warn{border-left:3px solid var(--gold);background:var(--gold-dim);
+  padding:12px 16px;border-radius:0 10px 10px 0;color:#F0DDB6;font-size:14.5px}
+
+.prog{position:sticky;top:0;background:rgba(14,17,22,.94);backdrop-filter:blur(8px);
+  padding:14px 0 12px;margin:26px 0 8px;z-index:5;border-bottom:1px solid var(--line)}
+.prog-row{display:flex;align-items:center;gap:12px}
+.prog-bar{flex:1;height:7px;background:var(--line);border-radius:99px;overflow:hidden}
+#pbar{display:block;height:100%;width:0;background:var(--gold);
+  transition:width .35s cubic-bezier(.4,0,.2,1)}
+.prog-txt{font-family:var(--mono);font-size:12px;color:var(--dim);white-space:nowrap}
+
+.leak{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:20px 22px;margin:14px 0;transition:border-color .2s}
+.leak.filled{border-color:var(--gold-dim)}
+.leak-hd{display:flex;align-items:baseline;gap:10px;margin-bottom:6px}
+.leak-n{font-family:var(--mono);font-size:12px;color:var(--gold);flex:none}
+.leak-t{font-size:17px;font-weight:600}
+.sym{color:var(--dim);font-size:14.5px;margin:0 0 14px}
+.field{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.field label{font-size:14.5px;color:var(--ink);flex:1;min-width:190px}
+.field input{width:110px;background:#0B0E13;border:1px solid var(--line);color:var(--ink);
+  font-family:var(--mono);font-size:16px;padding:9px 12px;border-radius:9px;text-align:right}
+.field input:focus{outline:none;border-color:var(--gold)}
+.unit{font-family:var(--mono);font-size:13px;color:var(--dim);flex:none}
+.leak-out{margin-top:12px;font-family:var(--mono);font-size:13.5px;color:var(--dim)}
+.leak-out b{color:var(--red);font-weight:600}
+.fix{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);
+  font-size:14px;color:var(--dim)}
+.fix .k{color:var(--ok);font-family:var(--mono);font-size:12px;letter-spacing:.05em}
+
+.assume{background:#12161D;border:1px dashed var(--line);border-radius:14px;
+  padding:18px 22px;margin:22px 0}
+.assume h3{margin:0 0 8px;font-size:15px;color:var(--gold)}
+.assume p{margin:0 0 14px;font-size:14px;color:var(--dim)}
+
+.res{margin-top:30px;opacity:0;transform:translateY(10px);
+  transition:opacity .45s,transform .45s;pointer-events:none}
+.res.on{opacity:1;transform:none;pointer-events:auto}
+.res-card{background:var(--card);border:1px solid var(--gold-dim);border-radius:16px;
+  padding:28px 24px}
+.res-lead{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--gold);
+  text-transform:uppercase;margin-bottom:10px}
+.res-big{font-size:clamp(32px,8vw,50px);font-weight:700;line-height:1.15;
+  letter-spacing:-.02em;margin-bottom:4px}
+.res-big span{color:var(--red)}
+.res-year{font-family:var(--mono);font-size:14px;color:var(--dim);margin-bottom:20px}
+.rank{margin:18px 0 0;padding:0;list-style:none}
+.rank li{display:flex;justify-content:space-between;gap:14px;padding:9px 0;
+  border-bottom:1px solid var(--line);font-size:15px}
+.rank li:last-child{border-bottom:none}
+.rank .amt{font-family:var(--mono);color:var(--red);white-space:nowrap}
+.cta{display:block;text-align:center;background:var(--gold);color:#1A1206;
+  font-weight:700;font-size:16.5px;text-decoration:none;padding:15px 20px;
+  border-radius:12px;margin-top:22px}
+.cta-sub{text-align:center;font-size:13px;color:var(--dim);margin-top:9px}
+.alt{display:block;text-align:center;color:var(--gold);text-decoration:none;
+  font-size:14.5px;margin-top:16px;border:1px solid var(--gold-dim);
+  padding:12px;border-radius:12px}
+footer{margin-top:46px;padding-top:20px;border-top:1px solid var(--line);
+  font-size:13px;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">造王者・免費工具</div>
+  <h1>漏客自查帳本</h1>
+  <p class="sub">你的店每個月漏掉多少錢，其實填幾個數字就算得出來。</p>
+  <div class="by">James Wu｜AI 造王者</div>
+
+  <div class="how">
+    <p>大部分老闆知道生意「有點不順」，但說不出漏在哪。這張表把它拆成六條，每一條你都能自己填。</p>
+    <p>不用留 email、不用註冊，數字只留在你的瀏覽器裡。</p>
+    <p class="warn">先講清楚：這是<b>估算</b>，不是你的財報。下面每一條的成交率都可以自己調——
+      我預設的數字偏保守，<b>不是假設每一通漏接的電話都會成交</b>。
+      算出來覺得太醜，先別急著相信，把成交率改成你自己的實際數字再看一次。</p>
+  </div>
+
+  <div class="prog">
+    <div class="prog-row">
+      <div class="prog-bar"><span id="pbar"></span></div>
+      <div class="prog-txt" id="ptxt">0 / 7 已填</div>
+    </div>
+  </div>
+
+  <div id="leaks"></div>
+
+  <div class="assume">
+    <h3>可以調的假設</h3>
+    <p>這三個數字直接決定結果。改成你店裡的真實情況，算出來才有意義。</p>
+    <div class="field">
+      <label>漏接的客人裡，本來會成交的比例</label>
+      <input type="number" id="aClose" value="30" min="0" max="100" step="5">
+      <span class="unit">%</span>
+    </div>
+    <div class="field" style="margin-top:12px">
+      <label>沒跟進的報價單，跟了能救回的比例</label>
+      <input type="number" id="aQuote" value="20" min="0" max="100" step="5">
+      <span class="unit">%</span>
+    </div>
+    <div class="field" style="margin-top:12px">
+      <label>你一小時的時間值多少（用來算行政成本）</label>
+      <input type="number" id="aHour" value="600" min="0" step="50">
+      <span class="unit">元 / 小時</span>
+    </div>
+  </div>
+
+  <div class="res" id="res">
+    <div class="res-card">
+      <div class="res-lead">保守估算</div>
+      <div class="res-big">每個月漏掉 <span id="rMonth">—</span></div>
+      <div class="res-year" id="rYear">一年 —</div>
+
+      <ul class="rank" id="rRank"></ul>
+
+      <a class="cta" href="https://line.me/R/ti/p/@826wdyra">
+        把最大的那條補起來 →
+      </a>
+      <div class="cta-sub">加 LINE 跟我說你的數字，我告訴你這條該先補哪一段</div>
+
+      <a class="alt" href="https://www.skool.com/ai-kingmaker/about">
+        想自己動手補？造王者圈有完整模板 →
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    這張表只做估算用途，不構成任何財務或投資建議。<br>
+    數字全部留在你的瀏覽器，不會傳到任何伺服器。
+  </footer>
+</div>
+
+<script>
+// 六個漏水點。每一條：問一個老闆答得出來的數字，然後用可調的成交率換成錢。
+// 刻意不做「每一通都會成交」那種灌水算法——老闆會算數，數字太漂亮反而沒人信。
+const LEAKS = [
+  { n:1, t:"漏接的電話",
+    sym:"沒人接、忙線、下班後打來。客人不會留言，他打給下一家。",
+    q:"一天大概漏接幾通", unit:"通 / 天", id:"call", def:"",
+    calc:(v,a)=> v * 30 * a.price * a.close,
+    fix:"營業時間外自動接聽並回覆，把來電轉成一則有紀錄的詢問。" },
+
+  { n:2, t:"隔太久才回的訊息",
+    sym:"LINE、IG、FB 私訊隔天才看到。客人問的當下最想買，隔天就冷了。",
+    q:"一天大概幾則沒能即時回", unit:"則 / 天", id:"msg", def:"",
+    calc:(v,a)=> v * 30 * a.price * a.close * 0.6,
+    fix:"關鍵字自動回覆先接住，把「已收到＋你要的東西」在幾秒內送出去。" },
+
+  { n:3, t:"沒跟進的報價單",
+    sym:"報價寄出去就沒下文。多數成交發生在第二次到第五次接觸。",
+    q:"一個月幾張報價沒再跟進", unit:"張 / 月", id:"quote", def:"",
+    calc:(v,a)=> v * a.price * a.quote,
+    fix:"報價後第 3 天、第 7 天、第 14 天自動提醒，不用你記。" },
+
+  { n:4, t:"沒回訪的老客戶",
+    sym:"最便宜的客人是回頭客，但沒有人提醒你他多久沒來了。",
+    q:"半年以上沒回來的老客大約幾位", unit:"位", id:"old", def:"",
+    calc:(v,a)=> v * a.price * 0.15 / 12,
+    fix:"依上次消費日自動分群，到期推一則不像廣告的關心訊息。" },
+
+  { n:5, t:"重複的行政工作",
+    sym:"把 A 表格抄到 B 表格、每天回一樣的問題、手動對帳。這些時間本來可以拿去接客。",
+    q:"你一天花幾小時在重複作業", unit:"小時 / 天", id:"admin", def:"",
+    calc:(v,a)=> v * 22 * a.hour,
+    fix:"這一條最好處理——重複而且每次做法一樣的事，機器做得比人穩。" },
+
+  { n:6, t:"營業時間外的詢問",
+    sym:"晚上十點、週日下午。你關店了，客人的需求沒有關。",
+    q:"一週大約幾則非上班時間的詢問", unit:"則 / 週", id:"off", def:"",
+    calc:(v,a)=> v * 4.3 * a.price * a.close,
+    fix:"24 小時待命的接待員，先問清楚需求並約好時間，你上班再接手。" },
+];
+
+const money = n => "NT$" + Math.round(n).toLocaleString("en-US");
+const el = id => document.getElementById(id);
+
+// 客單價獨立一欄——它會被每一條用到
+const PRICE = { id:"price", q:"你的平均客單價", unit:"元" };
+
+function render(){
+  const box = el("leaks");
+  box.innerHTML = `
+    <div class="leak" data-id="price">
+      <div class="leak-hd"><span class="leak-n">先填這個</span>
+        <span class="leak-t">平均客單價</span></div>
+      <p class="sym">一位客人平均帶來多少營收。抓個大概就好，不用翻帳。</p>
+      <div class="field">
+        <label>${PRICE.q}</label>
+        <input type="number" id="price" min="0" step="100" placeholder="0">
+        <span class="unit">${PRICE.unit}</span>
+      </div>
+    </div>` +
+    LEAKS.map(L => `
+    <div class="leak" data-id="${L.id}">
+      <div class="leak-hd"><span class="leak-n">漏水點 ${L.n}</span>
+        <span class="leak-t">${L.t}</span></div>
+      <p class="sym">${L.sym}</p>
+      <div class="field">
+        <label>${L.q}</label>
+        <input type="number" id="${L.id}" min="0" step="1" placeholder="0">
+        <span class="unit">${L.unit}</span>
+      </div>
+      <div class="leak-out" id="out_${L.id}"></div>
+      <div class="fix"><span class="k">怎麼補</span>　${L.fix}</div>
+    </div>`).join("");
+}
+
+function assumptions(){
+  return {
+    price: +el("price").value || 0,
+    close: (+el("aClose").value || 0) / 100,
+    quote: (+el("aQuote").value || 0) / 100,
+    hour:  +el("aHour").value || 0,
+  };
+}
+
+function recalc(){
+  const a = assumptions();
+  let total = 0, filled = 0, rows = [];
+
+  if (a.price > 0) filled++;
+  document.querySelector('[data-id="price"]')
+    .classList.toggle("filled", a.price > 0);
+
+  for (const L of LEAKS){
+    const v = +el(L.id).value || 0;
+    const card = document.querySelector(`[data-id="${L.id}"]`);
+    card.classList.toggle("filled", v > 0);
+    if (v > 0) filled++;
+
+    // 客單價沒填的話，除了行政那條之外都算不出金額
+    const amt = (a.price > 0 || L.id === "admin") ? L.calc(v, a) : 0;
+    total += amt;
+    el("out_" + L.id).innerHTML = v > 0 && amt > 0
+      ? `這一條每月約 <b>${money(amt)}</b>`
+      : (v > 0 && a.price === 0 ? `<span>先把客單價填上，這條才算得出來</span>` : "");
+    if (amt > 0) rows.push({ t: L.t, amt });
+  }
+
+  el("pbar").style.width = (filled / 7 * 100) + "%";
+  el("ptxt").textContent = `${filled} / 7 已填`;
+
+  const res = el("res");
+  if (total > 0){
+    res.classList.add("on");
+    el("rMonth").textContent = money(total);
+    el("rYear").textContent = `一年 ${money(total * 12)}`;
+    rows.sort((x, y) => y.amt - x.amt);
+    el("rRank").innerHTML = rows.map((r, i) =>
+      `<li><span>${i === 0 ? "🩸 " : ""}${r.t}</span>
+           <span class="amt">${money(r.amt)}</span></li>`).join("");
+  } else {
+    res.classList.remove("on");
+  }
+  save();
+}
+
+// 存在瀏覽器，重整不用重填。存不進去（無痕模式）也不能讓頁面壞掉。
+const KEY = "kingmaker_ledger_v1";
+const FIELDS = ["price","aClose","aQuote","aHour", ...LEAKS.map(L => L.id)];
+function save(){
+  try{
+    const o = {}; FIELDS.forEach(f => o[f] = el(f).value);
+    localStorage.setItem(KEY, JSON.stringify(o));
+  }catch(e){}
+}
+function load(){
+  try{
+    const o = JSON.parse(localStorage.getItem(KEY) || "{}");
+    FIELDS.forEach(f => { if (o[f] !== undefined && el(f)) el(f).value = o[f]; });
+  }catch(e){}
+}
+
+render();
+load();
+document.addEventListener("input", e => {
+  if (e.target.matches("input[type=number]")) recalc();
+});
+recalc();
+</script>
+</body>
+</html>
