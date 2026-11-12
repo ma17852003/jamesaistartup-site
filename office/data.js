@@ -73,7 +73,7 @@ window.EMPIRE_DATA = {
         { code: "x-expert", role: "X 平台專家", frame: "x-algorithm", note: "內建開源權重表：回覆=10讚·複製連結=40讚·檢舉=−468讚" },
         { code: "threads-expert", role: "Threads 專家", frame: "AK-Booster", note: "指揮 10 個 Threads 技能；管兩個帳號" },
         { code: "ig-expert", role: "IG 專家", frame: "—", note: "Reels/輪播/限動三格式三 KPI" },
-        { code: "fb-expert", role: "FB 專家", frame: "40 支 Reels 鉤子", note: "營造業客戶 SMB 獲客主場（社團策略）" },
+        { code: "fb-expert", role: "FB 專家", frame: "40 支 Reels 鉤子", note: "營造業線 SMB 獲客主場（社團策略）" },
         { code: "tiktok-expert", role: "TikTok 專家", frame: "開疆評估", note: "只做 YT 切片零成本分發；交易線不碰" },
         { code: "linkedin-expert", role: "LinkedIn 專家", frame: "—", note: "B2B 信任線；不發加密內容" }
       ],
@@ -183,7 +183,7 @@ window.EMPIRE_DATA = {
     { name: "FOMO 水族館", tier: "yellow", model: "NT$980/月 · 90天觀察", path: "—", note: "🟡 最低投入" },
     { name: "邊緣 AI 引介", tier: "yellow", model: "成交抽 10%", path: "—", note: "🟡 被動等待" },
     { name: "AI 課程 / Skool / 澳洲 B2B", tier: "frozen", model: "等 YouTube 月均 5萬觀看", path: "—", note: "❄️ 冰凍" },
-    { name: "4 個 B2B 案源", tier: "frozen", model: "B2B 案源", path: "—", note: "❄️ 2026-07 全斷" },
+    { name: "已斷線的 4 個案源", tier: "frozen", model: "B2B 案源", path: "—", note: "❄️ 2026-07 全斷" },
     { name: "HelpMe 醫療", tier: "dormant", model: "LINE Bot + Retell", path: "—", note: "💤 未激活" },
     { name: "CycleNav 投資 WebApp", tier: "dormant", model: "康波週期", path: "—", note: "💤 未激活" },
     { name: "LevelMEUp", tier: "dormant", model: "遊戲化人生 RPG", path: "—", note: "💤 未激活" },
