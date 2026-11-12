@@ -37,7 +37,7 @@ const MACH_DZ = -1.9;                                // 機台在輸送帶後方
 const BELT_TOP = FY + .505, TICKET_Y = BELT_TOP + .45;
 const CLOCK_Y = FY + 1.7, CLOCK_S = .6, CLOCK_DZ = .3;
 const FLAG_Y = FY + 1.66, FLAG_RISE = .66;
-const CAM_MS = 800, SLIDE_MS = 1200, SQUASH_MS = 180, TURN_MS = 400, BELT_SPEED = 1.2;
+const CAM_MS = 800, SLIDE_MS = 1200, SQUASH_MS = 180, BELT_SPEED = 1.2;
 const LINE_CENTER = [3, 0, 40], LOD_FAR = 55, TARGET_DRIFT = 25; // 2026-11-12 左鍵改平移，8 太容易誤觸；拖遠了仍由 LOD_FAR 關閉近景
 const HUD_SEL = '.bar,#dk-kpi.show,#dk-dock.show,#line-replay,#line-kpi,#mon-strip,#mon-panel';
 // __lineMetrics 只給測試／驗收旗標用（?linetest=1、?linecam=1、?rec=）
@@ -481,12 +481,16 @@ export function initLine3D(office, opts = {}) {
     for (const no of [1, 2]) placeBubble(lines[no]);
   }
 
-  /* ── 崗位分身（提案 §3.6：本尊照常坐辦公室；分身不進 office.people、無名牌、無狀態燈、戴工作帽）── */
+  /* ── 崗位分身（提案 §3.6：本尊照常坐辦公室；分身不進 office.people、無名牌、無狀態燈、戴工作帽）──
+     2026-11-12 James：「造王者產線上面怎麼沒有人」→ 每站兩個分身，各顧一條線、各自面向自己那條輸送帶，不再轉身。
+     L2 分身留在原本的走道位置（REC 只拍 L2，鏡頭量測不變）；L1 分身站在 L1 輸送帶南側、站牌右邊的空隙（站在站牌前面會擋住站名）。 */
+  const CREW_X = { 1: 3.4, 2: 0 }, CREW_Z = { 1: L1Z + 1.3, 2: AISLE }, CREW_FACE = { 1: 0, 2: Math.PI }; // L1 朝北（-z）、L2 朝南（+z）
   ST.forEach((s, i) => {
     const a = roster.find(r => r.code === s.code);
     if (!a) { console.warn('line: 名冊查不到崗位', s.code); return; }
     const zone = office.ZONES[a.deptId] || office.ZONES.brand;
-    const p = office.person(a, zone, SX[i], AISLE);
+    stations[i].staff = [1, 2].map(no => {
+    const p = office.person(a, zone, SX[i] + CREW_X[no], CREW_Z[no]);
     const k = office.people.indexOf(p); if (k >= 0) office.people.splice(k, 1);
     office.scene.remove(p); root.add(p);
     const u = p.userData;
@@ -495,9 +499,10 @@ export function initLine3D(office, opts = {}) {
     const capM = new T.MeshLambertMaterial(); capM.color.set(zone.tone).multiplyScalar(.75);
     office.addCap(p, capM); // 只有舊款小人（?look=0）會真的戴上；有造型的人不戴帽，原因見 office3d.html addCap
     const arms = u.parts.arms;
-    p.position.set(SX[i], FY, AISLE); p.rotation.y = Math.PI; // 預設面向 L2（+z）
-    Object.assign(p.userData, { lineStation: i + 1, lineNo: 2 }); // 分身站在兩線之間的走道、預設面向 L2 → 點分身開 L2
-    stations[i].staff = { p, deptId: a.deptId, capM, arms, head: u.parts.head, face: Math.PI, faceFrom: Math.PI, faceT0: 0, run: 0 };
+    p.position.set(SX[i] + CREW_X[no], FY, CREW_Z[no]); p.rotation.y = CREW_FACE[no];
+    Object.assign(p.userData, { lineStation: i + 1, lineNo: no }); // 點分身＝開他顧的那條線
+    return { p, no, deptId: a.deptId, capM, arms, head: u.parts.head, run: 0 };
+    });
   });
 
   /* ── 工單方塊（draft_id 為 key；只建新的、移除消失的、既有的只改屬性）── */
@@ -630,17 +635,8 @@ export function initLine3D(office, opts = {}) {
       refreshBubble(LN, nowMs);
     }
     for (const t of [...tickets.values()]) if (!seen.has(t.id)) removeTicket(t);
-    // 分身：只有該站 running 才動工；轉向在跑的那條線（L1 朝北、L2 朝南）；減少動態時直接轉到位
-    stations.forEach(st => {
-      if (!st.staff) return;
-      const run = st.lampTone[2] === 'running' ? 2 : st.lampTone[1] === 'running' ? 1 : 0;
-      const face = run === 1 ? 0 : Math.PI, sf = st.staff;
-      if (face !== sf.face) {
-        sf.face = face;
-        if (reduce) { sf.p.rotation.y = face; sf.faceFrom = face; } else { sf.faceFrom = sf.p.rotation.y; sf.faceT0 = now; }
-      }
-      sf.run = run;
-    });
+    // 分身：自己那條線的這一站 running 才動工
+    stations.forEach(st => { if (st.staff) st.staff.forEach(sf => { sf.run = st.lampTone[sf.no] === 'running' ? sf.no : 0; }); });
   }
 
   /* ── 泡泡：每線最多 1 個（失敗原因 > 處理中經過時間 > 已排程時鐘），只在產線鏡頭顯示 ── */
@@ -687,10 +683,7 @@ export function initLine3D(office, opts = {}) {
     for (const no of [1, 2]) if (lines[no].sliding) { beltOffset[no] -= dt * BELT_SPEED; lines[no].beltMat.map.offset.x = beltOffset[no]; } // 只在有工單移動時捲
     const et = t / 1000;
     stations.forEach((st, i) => {
-      const s = st.staff;
-      if (s) {
-        const k = reduce ? 1 : Math.min(1, (t - s.faceT0) / TURN_MS);
-        s.p.rotation.y = s.faceFrom + (s.face - s.faceFrom) * (1 - Math.pow(1 - k, 3));
+      for (const s of st.staff || []) {
         const [a1, a2] = s.arms;
         if (a1 && a2) {
           let r1 = 0, r2 = 0, hx = 0, hy = 0, bz = 0;
@@ -723,11 +716,12 @@ export function initLine3D(office, opts = {}) {
     for (const t of tickets.values()) { paintTicket(t); t.lsig = [t.lit, t.failed, t.running, themeName].join('|'); }
     stations.forEach(st => {
       for (const no of [1, 2]) { const c = toneColor(st.lampTone[no]); st.lamp[no].m.material.color.set(c); st.lamp[no].h.material.color.set(c); }
-      const s = st.staff; if (!s) return;
+      for (const s of st.staff || []) {
       const tone = (office.ZONES[s.deptId] || office.ZONES.brand).tone, P = cur().person, m = s.p.userData.mats;
       m.body.color.set(tone); m.arm.color.set(tone).multiplyScalar(.75); s.capM.color.set(tone).multiplyScalar(.75);
       m.skin.color.setHex(P.skin); m.hair.color.setHex(P.hair); m.eye.color.setHex(P.eye); m.leg.color.setHex(P.leg);
       if (s.p.userData.look) office.lookRetheme(s.p); // 有造型的人：膚色髮色還原成個人的，衣服零件跟部門色
+      }
     });
     const n = office.label(ROOM_TXT, 46, brandTone());
     if (roomLabel.material.map) roomLabel.material.map.dispose();
@@ -853,8 +847,9 @@ export function initLine3D(office, opts = {}) {
     flagMeshUp: no => lines[no].flags.map(f => (f.mesh.position.y > FLAG_Y + FLAG_RISE / 2 ? 1 : 0)),
     ticketStation: did => tickets.get(did)?.station,
     ticketX: did => tickets.get(did)?.x,
-    staffCount: () => stations.filter(s => s.staff).length,
-    armRot: () => stations.flatMap(s => (s.staff ? s.staff.arms.map(a => a.rotation.x) : [])),
+    staffCount: () => stations.reduce((n, s) => n + (s.staff ? s.staff.length : 0), 0),
+    staffOn: no => stations.filter(s => s.staff && s.staff.some(sf => sf.no === no)).length,
+    armRot: () => stations.flatMap(s => (s.staff || []).flatMap(sf => sf.arms.map(a => a.rotation.x))),
     beltOffset: no => lines[no].beltMat.map.offset.x,
     bubbleText: no => lines[no].bubble?.userData.text ?? null,
     bubbleY: no => lines[no].bubble?.position.y,

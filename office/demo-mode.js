@@ -6,15 +6,14 @@
  *  - 必須在 data.js 之後、office3d 主程式之前載入
  * ============================================================ */
 (function(){
-const BLOCK_CODES=['special-advisor','suozhang-advisor','dual-mentor-advisor','serenity-advisor','oldwang-advisor'];
+const BLOCK_CODES=['futures-advisor','range-advisor','intraday-advisor','us-supply-advisor','tw-stock-advisor'];
 /* 名字、code、獲利字眼；展示資料裡一筆都不准出現（自測掃這個） */
-const BLOCK_RE=/serenity|aleabito|oldwang|suozhang|special-advisor|dual-mentor|老王|所長|雙師|特別顧問|會賺|真倉|勝率|獲利/i;
+const BLOCK_RE=/us-supply-advisor|tw-stock-advisor|futures-advisor|range-advisor|intraday-advisor|會賺|真倉|勝率|獲利/i;
 /* 先做精準替換保住句子其他部分；替換完還中黑名單的字串整條清空 */
 const REPLACE=[
-  [/Serenity 九步/g,'供應鏈瓶頸九步'],
   [/[；;]\s*OI 報單已驗證會賺/g,''],
-  [/\s*·?\s*⚠️?\s*MEXC\s*真倉\s*live\s*·?\s*/gi,' · '],
-  [/\s*·\s*MEXC\s*真倉/g,'']
+  [/\s*·?\s*⚠️?\s*交易所\s*真倉\s*live\s*·?\s*/gi,' · '],
+  [/\s*·\s*交易所\s*真倉/g,'']
 ];
 
 function isDemo(search){

@@ -480,21 +480,22 @@ const LOOKS={
   Cook:   {body:'M',bw:.54,face:'small',skin:'porcelain',hair:'H2',hairColor:'brown',outfit:'G3',acc:['headphones']}
 };
 /* 以真人命名、性別明確的角色固定性別表現；其他人由代號決定，大約一半一半 */
-const LOOK_GENDER={'investment-cathie-wood':'f',naval:'m','donald-miller':'m',mrbeast:'m','steve-jobs':'m','alex-hormozi':'m',
-  'keith-ferrazzi':'m','sean-ellis':'m','david-spinks':'m','dankoe-media-director':'m','oldwang-advisor':'m',
-  'serenity-advisor':'f','suozhang-advisor':'m','special-advisor':'m'};
+const LOOK_GENDER={'investment-longterm':'f','brand-philosopher':'m','brand-storyteller':'m','content-director':'m','product-wizard':'m','sales-closer':'m',
+  'network-architect':'m','growth-hacker':'m','community-builder':'m','media-director':'m','tw-stock-advisor':'m',
+  'us-supply-advisor':'f','range-advisor':'m','futures-advisor':'m'};
 const LOOK_SIGS=new Set(Object.values(LOOKS).map(l=>[l.hair,l.hairColor,l.outfit,l.body,l.face].join('|')));
 const LOOK_DEPT_HAIR={}; /* 部門|髮色 → 人數 */
 const LOOK_CACHE={};     /* 代號 → 算出來的造型（本尊、部門產線分身、v1 產線分身共用同一份） */
-function lookRng(str,salt){ /* 代號 → 固定亂數序列 */
-  let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
+function lookRng(str,salt){ /* 代號 → 固定亂數序列；傳數字＝已經算好的雜湊（公開版改名的人用） */
+  let h=2166136261;if(typeof str==='number')h=str;else for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
   let a=(h+salt*977)|0;
   return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
 }
+const LOOK_SEED={'us-supply-advisor':-1223703981,'tw-stock-advisor':-1771812864,'futures-advisor':-407828791,'range-advisor':111669629,'intraday-advisor':1725531710,'investment-longterm':-1727591515,'investment-listing':-1480397532,'mispricing-hunter':1924843129,'media-director':1690523903,'sales-closer':-155971708,'network-architect':-1976113356,'growth-hacker':-487652708,'community-builder':-356244690,'brand-philosopher':268231135,'brand-storyteller':2089175445,'content-director':1078187297,'product-wizard':-1082941501,'chart-analyst':1880578565}; /* 公開版改名的人：沿用改名前的造型 */
 function lookGen(agent){
   let look=null;
   for(let n=0;n<24;n++){ /* 撞到別人的整套造型、或同部門這個髮色已經 3 人，就換一組；最多試 24 次（第 12 次起不再管髮色人數） */
-    const r=lookRng(agent.code,n),pick=a=>a[Math.floor(r()*a.length)],chance=p=>r()<p;
+    const r=lookRng(LOOK_SEED[agent.code]??agent.code,n),pick=a=>a[Math.floor(r()*a.length)],chance=p=>r()<p;
     const coin=r()<.5?'f':'m',f=(LOOK_GENDER[agent.code]||coin)==='f';
     const skin=pick(['porcelain','apricot','apricot','wheat','wheat','honey','deep']);
     let colors=skin==='deep'?['auburn','silver','flax','berry','brown']:['ink','ink','brown','brown','auburn','flax','silver','berry'];
@@ -750,21 +751,21 @@ const DL_STATIONS={
 const DL_LEDGER={inv:'📒 帳本：投資三本登記簿（v2 接線中）',sales:'📒 帳本：NocoDB CRM（v2 接線中）',dev:'📒 帳本：n8n 執行紀錄（v2 接線中）'};
 /* 崗位指派：依 agent 實際職責；沒列到的補到人最少的站 */
 const DL_HINT={Jassy:0,Buffett:1,Elon:2,Cook:3,Jobs:4,
-  'narrative-hunter':0,'bottleneck-hunter':0,'investment-altcoin':0,'investment-mexc':0,
+  'narrative-hunter':0,'bottleneck-hunter':0,'investment-altcoin':0,'investment-listing':0,
   /* 2026-11-12 James：6 位外部顧問搬到個人顧問線；投資②查證改由本來就在做共識查核／長線審視的兩位接 */
-  'camillo-mispricing-hunter':1,'investment-cathie-wood':1,
-  'senior-investment-advisor':0,'serenity-advisor':0,'oldwang-advisor':1,'special-advisor':2,'suozhang-advisor':2,'dual-mentor-advisor':3,
-  'swing-master':2,'daytrading-master':2,'investment-daytrader':2,'ict-chart-analyst':2,'flow-swing-expert':2,
+  'mispricing-hunter':1,'investment-longterm':1,
+  'senior-investment-advisor':0,'us-supply-advisor':0,'tw-stock-advisor':1,'futures-advisor':2,'range-advisor':2,'intraday-advisor':3,
+  'swing-master':2,'daytrading-master':2,'investment-daytrader':2,'chart-analyst':2,'flow-swing-expert':2,
   'macro-cycle-officer':3,'investment-ceo':3,'investment-fx':3,'quant-validator':4,'bubble-top-auditor':4,
   'investment-risk':5,'investment-analyst':5,'investment-team':5,
   'dev-team':0,'architect':1,'frontend-dev':2,'n8n-dev':3,'qa':4,'devops':5,
   'trend-hunter':0,'competitor-monitor':0,'marketing-director':1,'marketing-team':1,'prompt-enhancer':1,
   'copywriter':2,'case-study-writer':2,'youtube-script':3,'email-outreach':4,'report-builder':5,
-  'dankoe-media-director':0,'mrbeast':0,'steve-jobs':0,'naval':1,'donald-miller':1,'fomo-ta-creator':1,
+  'media-director':0,'content-director':0,'product-wizard':0,'brand-philosopher':1,'brand-storyteller':1,'fomo-ta-creator':1,
   'visual-creator':2,'web-design-stylist':2,'video-director':3,'viral-critic':4,'product-marketing-context':4,'content-shipper':5,
   'threads-expert':0,'ig-expert':0,'x-expert':1,'linkedin-expert':2,'fb-expert':3,'tiktok-expert':4,
-  'crm-manager':0,'keith-ferrazzi':0,'sales-contacts':0,'sales-company':0,'sean-ellis':1,'david-spinks':1,'sales-competitive':1,
-  'alex-hormozi':4,'sales-strategy':2,'sales-opportunity':3,
+  'crm-manager':0,'network-architect':0,'sales-contacts':0,'sales-company':0,'growth-hacker':1,'community-builder':1,'sales-competitive':1,
+  'sales-closer':4,'sales-strategy':2,'sales-opportunity':3,
   'swarm-coordinator':0,'project-manager':0,'customer-success':0,'data-analyst':1,'seo-specialist':1,'finance-tax':2,
   'legal-advisor':3,'equity-structure-architect':3,'source-auditor':3,'knowledge-architect':4,
   'research-scholar':1};
