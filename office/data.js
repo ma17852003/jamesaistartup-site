@@ -17,7 +17,7 @@ window.EMPIRE_DATA = {
   warRoom: [
     { label: "進行中專案", value: "6", unit: "條", tone: "active", note: "🟢全力推進級" },
     { label: "凍結 / 未激活", value: "10+", unit: "條", tone: "frozen", note: "誠實列示" },
-    { label: "確定進帳 pipeline", value: "≈ 0", unit: "", tone: "danger", note: "乒乓 5萬做完即空（2026-07 現況）" },
+    { label: "確定進帳 pipeline", value: "≈ 0", unit: "", tone: "danger", note: "球館 5萬做完即空（2026-07 現況）" },
     { label: "AI 員工", value: "37", unit: "位", tone: "neutral", note: "5 部門 + 營運支援 + 個人顧問（2026-07-27 名冊同步）" }
   ],
 
@@ -38,13 +38,13 @@ window.EMPIRE_DATA = {
       skillCoverage: 0.85,
       agents: [
         { code: "dev-team", role: "全端開發", frame: "—", note: "n8n·Claude API·Firebase·Flutter·Python·Node" },
-        { code: "architect", role: "系統架構師（全元）", frame: "技術選型・跨模組設計", note: "全元專案層：只在 enterprise-automation-deploy 叫得到" },
-        { code: "n8n-dev", role: "n8n 工程師（全元）", frame: "workflow・Code 節點", note: "全元專案層" },
-        { code: "frontend-dev", role: "前端工程師（全元）", frame: "offline portal・手機表單", note: "全元專案層" },
-        { code: "qa", role: "品保工程師（全元）", frame: "端對端・silent fail 偵測", note: "全元專案層" },
-        { code: "devops", role: "部署工程師（全元）", frame: "docker-compose・NocoDB schema・tunnel", note: "全元專案層" }
+        { code: "architect", role: "系統架構師（營造業客戶）", frame: "技術選型・跨模組設計", note: "營造業客戶專案層：只在 enterprise-automation-deploy 叫得到" },
+        { code: "n8n-dev", role: "n8n 工程師（營造業客戶）", frame: "workflow・Code 節點", note: "營造業客戶專案層" },
+        { code: "frontend-dev", role: "前端工程師（營造業客戶）", frame: "offline portal・手機表單", note: "營造業客戶專案層" },
+        { code: "qa", role: "品保工程師（營造業客戶）", frame: "端對端・silent fail 偵測", note: "營造業客戶專案層" },
+        { code: "devops", role: "部署工程師（營造業客戶）", frame: "docker-compose・NocoDB schema・tunnel", note: "營造業客戶專案層" }
       ],
-      note: "主力產能來源；乒乓 WebApp、各 FOMO 系統、客戶部署都靠它"
+      note: "主力產能來源；球館 WebApp、各 FOMO 系統、客戶部署都靠它"
     },
     {
       id: "mkt", name: "行銷團隊", head: "CMO Jassy", icon: "📣", status: "running",
@@ -60,7 +60,7 @@ window.EMPIRE_DATA = {
         { code: "case-study-writer", role: "案例文章師", frame: "—", note: "B2B 開發案例" },
         { code: "report-builder", role: "報告整合員", frame: "—", note: "日報/週報彙整" },
         { code: "prompt-enhancer", role: "指令優化師", frame: "Anthropic", note: "口語→結構化 prompt" },
-        { code: "marketing-team", role: "行銷團隊（總線）", frame: "—", note: "全元/YouTube/AIRA 內容產出" }
+        { code: "marketing-team", role: "行銷團隊（總線）", frame: "—", note: "營造業客戶/YouTube/引介合作 內容產出" }
       ],
       note: "內容飛輪核心；YouTube 頻道是帝國引流母艦"
     },
@@ -73,7 +73,7 @@ window.EMPIRE_DATA = {
         { code: "x-expert", role: "X 平台專家", frame: "x-algorithm", note: "內建開源權重表：回覆=10讚·複製連結=40讚·檢舉=−468讚" },
         { code: "threads-expert", role: "Threads 專家", frame: "AK-Booster", note: "指揮 10 個 Threads 技能；管兩個帳號" },
         { code: "ig-expert", role: "IG 專家", frame: "—", note: "Reels/輪播/限動三格式三 KPI" },
-        { code: "fb-expert", role: "FB 專家", frame: "40 支 Reels 鉤子", note: "全元 SMB 獲客主場（社團策略）" },
+        { code: "fb-expert", role: "FB 專家", frame: "40 支 Reels 鉤子", note: "營造業客戶 SMB 獲客主場（社團策略）" },
         { code: "tiktok-expert", role: "TikTok 專家", frame: "開疆評估", note: "只做 YT 切片零成本分發；交易線不碰" },
         { code: "linkedin-expert", role: "LinkedIn 專家", frame: "—", note: "B2B 信任線；不發加密內容" }
       ],
@@ -125,7 +125,7 @@ window.EMPIRE_DATA = {
         { code: "sales-opportunity", role: "商機評估", frame: "—", note: "銷售研究五件組" },
         { code: "sales-strategy", role: "銷售策略", frame: "—", note: "銷售研究五件組" }
       ],
-      note: "pipeline 目前近乎枯竭（牙醫/某董事長/格棋/信義全斷）—— 待重啟開發"
+      note: "pipeline 目前近乎枯竭（4 個 B2B 案源全斷）—— 待重啟開發"
     },
     {
       id: "brand", name: "品牌 + 內容", head: "品牌哲學 · 故事敘事", icon: "🔮", status: "running",
@@ -176,14 +176,14 @@ window.EMPIRE_DATA = {
 
   // ── 產品線 Pipeline（誠實分級，反映 2026-07 現況）──
   pipeline: [
-    { name: "全元科技顧問", tier: "green", model: "年收 2% + 0.01%", path: "—", note: "🟢 全力推進" },
-    { name: "合力乒乓 WebApp", tier: "green", model: "NT$50,000 建置中", path: "—", note: "🟢 做完即空，pipeline 見底" },
+    { name: "營造業 AI 導入案", tier: "green", model: "年收 2% + 0.01%", path: "—", note: "🟢 全力推進" },
+    { name: "球館 WebApp", tier: "green", model: "NT$50,000 建置中", path: "—", note: "🟢 做完即空，pipeline 見底" },
     { name: "YouTube 頻道", tier: "green", model: "內容飛輪", path: "—", note: "🟢 引流母艦" },
     { name: "造王者內容引擎", tier: "green", model: "AI 員工變現", path: "—", note: "🟢 逆天改命戰略主軸" },
     { name: "FOMO 水族館", tier: "yellow", model: "NT$980/月 · 90天觀察", path: "—", note: "🟡 最低投入" },
-    { name: "AIRA 邊緣 AI 引介", tier: "yellow", model: "成交抽 10%", path: "—", note: "🟡 被動等待" },
+    { name: "邊緣 AI 引介", tier: "yellow", model: "成交抽 10%", path: "—", note: "🟡 被動等待" },
     { name: "AI 課程 / Skool / 澳洲 B2B", tier: "frozen", model: "等 YouTube 月均 5萬觀看", path: "—", note: "❄️ 冰凍" },
-    { name: "牙醫 / 某董事長 / 格棋 / 信義", tier: "frozen", model: "B2B 案源", path: "—", note: "❄️ 2026-07 全斷" },
+    { name: "4 個 B2B 案源", tier: "frozen", model: "B2B 案源", path: "—", note: "❄️ 2026-07 全斷" },
     { name: "HelpMe 醫療", tier: "dormant", model: "LINE Bot + Retell", path: "—", note: "💤 未激活" },
     { name: "CycleNav 投資 WebApp", tier: "dormant", model: "康波週期", path: "—", note: "💤 未激活" },
     { name: "LevelMEUp", tier: "dormant", model: "遊戲化人生 RPG", path: "—", note: "💤 未激活" },
@@ -192,11 +192,11 @@ window.EMPIRE_DATA = {
 
   // ── 專案 ↔ 用到哪些人 ↔ 待辦 ↔ 等 James 決定（來源：記憶系統）──
   projects: [
-    { name:"合力乒乓 WebApp", tier:"green", room:"dev",
+    { name:"球館 WebApp", tier:"green", room:"dev",
       agents:["dev-team","web-design-stylist"],
       todos:["建置收尾"], decisions:[],
       activity:"NT$50,000 建置中，做完 pipeline 見底" },
-    { name:"全元科技顧問", tier:"green", room:"dev",
+    { name:"營造業 AI 導入案", tier:"green", room:"dev",
       agents:["dev-team","project-manager"],
       todos:["Sprint 1 開工"], decisions:["Sprint 1 排程拍板"],
       activity:"Sprint 1 待開始" },
