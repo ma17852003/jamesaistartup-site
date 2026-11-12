@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI造王者公司 · 3D 像素辦公室</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a1a; --panel:#12122a; --border:#2a2a5a; --text:#e0e0ff;
+  --accent:#7c6fff; --gold:#ffd700; --green:#39ff14; --orange:#ff8c00; --red:#ff4444;
+  --font-pixel:'Press Start 2P','Noto Sans TC',monospace;
+  --ui-bar-bg:rgba(10,10,26,.88); --ui-legend-bg:rgba(10,10,26,.88);
+  --ui-info-bg:rgba(13,13,43,.94); --ui-todo-bg:rgba(13,13,43,.95);
+  --ui-hint:#667; --ui-infotext:#bbc;
+  --hover-border:#7c6fff; --hover-glow:none;
+  --btn-on-bg:#7c6fff; --btn-on-border:#7c6fff; --btn-on-text:#fff;
+  --gold-dim:#b8860b; --btn-game-on-text:#fff;
+  --shadow-ink:#000;
+  --title-shadow:0 0 12px #ffd700,2px 2px 0 #000;
+  --toast-bg:#ffd700; --toast-text:#0a0a1a; --toast-border:#fff; --toast-shadow:5px 5px 0 #000;
+  --todo-row-bg:rgba(124,111,255,.05); --todo-row-hover:rgba(124,111,255,.15);
+  --fx-overlay:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.07) 3px,rgba(0,0,0,.07) 6px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif}
+#c{position:fixed;inset:0;display:block}
+
+/* top bar */
+.bar{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;gap:14px;
+  padding:10px 16px;background:var(--ui-bar-bg);backdrop-filter:blur(8px);border-bottom:2px solid var(--border);flex-wrap:wrap}
+.bar .t{font-family:var(--font-pixel);font-size:15px;font-weight:900;color:var(--gold);text-shadow:var(--title-shadow)}
+.bar .s{font-size:13px;color:var(--accent)}
+.btns{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.btn{font-family:var(--font-pixel);font-size:10px;padding:8px 12px;background:var(--panel);
+  border:2px solid var(--border);color:var(--text);cursor:pointer}
+.btn:hover{border-color:var(--hover-border);box-shadow:var(--hover-glow)}
+.btn.on{background:var(--btn-on-bg);border-color:var(--btn-on-border);color:var(--btn-on-text)}
+.btn.game{border-color:var(--gold-dim);color:var(--gold)}
+.btn.game:hover{border-color:var(--gold)}
+.btn.game.on{background:var(--gold-dim);border-color:var(--gold);color:var(--btn-game-on-text)}
+.sep{width:2px;height:24px;background:var(--border)}
+
+/* 董事長公告 toast */
+.toast{position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-10px);z-index:40;
+  font-family:var(--font-pixel),'Noto Sans TC',monospace;font-size:12px;color:var(--toast-text);background:var(--toast-bg);
+  border:3px solid var(--toast-border);box-shadow:var(--toast-shadow);padding:13px 20px;opacity:0;pointer-events:none;transition:all .25s;
+  max-width:88vw;text-align:center;line-height:1.8}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* legend */
+.legend{position:fixed;left:12px;bottom:calc(var(--dock-h,0px) + 12px);z-index:20;background:var(--ui-legend-bg);border:2px solid var(--border);
+  padding:10px 12px;font-size:13px;line-height:2;max-width:215px}
+.legend .li{display:flex;align-items:center;gap:8px}
+.legend .sw{width:10px;height:10px;flex-shrink:0}
+.legend .hint{color:var(--ui-hint);font-size:11px;margin-top:6px;line-height:1.6}
+
+/* info card */
+.info{position:fixed;right:12px;top:calc(64px + var(--kpi-h,0px));z-index:20;width:250px;background:var(--ui-info-bg);
+  border:3px solid var(--accent);box-shadow:6px 6px 0 var(--shadow-ink);padding:16px;display:none}
+.info.show{display:block}
+.info .isp{font-size:34px;text-align:center;display:block;margin-bottom:8px}
+.info .inm{font-family:var(--font-pixel);font-size:11px;color:var(--gold);text-align:center;margin-bottom:6px;line-height:1.8}
+.info .idp{font-size:13px;color:var(--accent);text-align:center;margin-bottom:10px}
+.info .itx{font-size:13px;color:var(--ui-infotext);line-height:1.9;border-top:1px solid var(--border);padding-top:10px}
+.info .ibd{display:inline-block;font-size:11px;border:1px solid var(--accent);padding:2px 8px;margin-top:8px;color:var(--text)}
+.info .ix{position:absolute;top:6px;right:8px;background:none;border:1px solid var(--red);color:var(--red);
+  font-size:10px;padding:2px 7px;cursor:pointer}
+.info .ix:hover{background:var(--red);color:#fff}
+
+/* scanline / 網點 / 爐光 特效層(吃主題變數) */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:30;
+  background:var(--fx-overlay)}
+/* Live 待辦面板 */
+.todo{position:fixed;right:12px;bottom:calc(var(--dock-h,0px) + 12px);z-index:22;width:325px;max-height:64vh;overflow-y:auto;
+  background:var(--ui-todo-bg);border:3px solid var(--gold);box-shadow:6px 6px 0 var(--shadow-ink);padding:12px;display:none}
+.todo.show{display:block}
+.todo h3{font-family:var(--font-pixel);font-size:11px;color:var(--gold);margin:10px 0 6px;line-height:1.6}
+.todo h3:first-child{margin-top:0}
+.todo .row{display:flex;align-items:flex-start;gap:7px;font-size:13px;line-height:1.5;padding:6px 7px;
+  border:1px solid var(--border);margin-bottom:4px;cursor:pointer;background:var(--todo-row-bg)}
+.todo .row:hover{border-color:var(--accent);background:var(--todo-row-hover)}
+.todo .dot{width:9px;height:9px;flex-shrink:0;margin-top:3px}
+.todo .pj{color:var(--accent);font-size:11px}
+.todo .deci{border-color:#5a3a10}
+.todo .deci:hover{border-color:var(--gold)}
+.todo .empty{color:var(--ui-hint);font-size:13px;padding:6px}
+
+/* 主題字級/字重適配(規格書:press Syne 較窄需放大、foundry Silkscreen 微調) */
+body.theme-press .bar .t{font-size:17px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+body.theme-press .btn{font-size:12px;font-weight:800}
+body.theme-press .info .inm{font-size:13px;font-weight:800}
+body.theme-press .toast{font-size:14px;font-weight:800}
+body.theme-press .todo h3{font-weight:800}
+body.theme-foundry .bar .t{font-weight:700}
+body.theme-foundry .btn{font-size:11px}
+@media(max-width:700px){.bar .s{display:none}.info{width:210px}}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <span class="t">🏢 AI造王者公司</span>
+  <span class="s" id="sub">AI 帝國 · 載入中…</span>
+  <div class="btns">
+    <button class="btn view on" id="bIso" onclick="setCam('iso',this)">◤ 等角 45°</button>
+    <button class="btn view" id="bTop" onclick="setCam('top',this)">▣ 正俯視</button>
+    <button class="btn" id="bRot" onclick="toggleRot(this)">⟳ 自動旋轉</button>
+    <span class="sep"></span>
+    <button class="btn game" id="gMeet" onclick="setMode('meeting',this)">📢 全員開會</button>
+    <button class="btn game" id="gBreak" onclick="setMode('break',this)">☕ 茶水間</button>
+    <button class="btn game" id="gLine" onclick="setMode('line',this)">🏭 上產線</button>
+    <button class="btn game on" id="gWork" onclick="setMode('work',this)">💼 回工作</button>
+    <span class="sep"></span>
+    <button class="btn" id="bTodo" onclick="toggleTodo(this)">📋 待辦看板</button>
+    <span class="sep"></span>
+    <button class="btn" id="bTheme" onclick="cycleTheme()">🌙 午夜</button>
+  </div>
+</div>
+
+<div class="legend" id="legend"></div>
+
+<div class="info" id="info">
+  <button class="ix" onclick="hideInfo()">✕</button>
+  <span class="isp" id="isp">🤖</span>
+  <div class="inm" id="inm">—</div>
+  <div class="idp" id="idp">—</div>
+  <div class="itx" id="itx">—</div>
+  <div id="ibd"></div>
+</div>
+
+<div class="todo" id="todo"></div>
+
+<canvas id="c"></canvas>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="data.js?v=20261112"></script><!-- :7860 沒送 Cache-Control，名冊改了要換版號，不然瀏覽器拿舊檔 -->
+<script src="demo-mode.js"></script>
+<script>
+const D=window.EMPIRE_DATA;
+
+/* ── roster (same dedupe as其他版本) ── */
+let ALL=[];
+D.departments.forEach(d=>d.agents.forEach(a=>ALL.push({...a,deptId:d.id,dept:d.name,st:d.status,icon:d.icon})));
+D.ops.forEach(o=>ALL.push({code:o.code,role:o.name,note:o.items.join(' · '),frame:'營運',deptId:'ops',dept:'營運支援',st:'running'}));
+D.personal.forEach(p=>ALL.push({code:p.code,role:p.name,note:p.note,frame:p.frame,deptId:'personal',dept:'個人顧問',st:p.st||'standby'}));
+const seen=new Set();ALL=ALL.filter(a=>{if(seen.has(a.code))return false;seen.add(a.code);return true;});
+document.getElementById('sub').textContent=`一人公司 · ${ALL.length} 位員工 + ${D.command.length} 位高管 · ${ALL.length+D.command.length} 人在崗`;
+
+/* ── zones(房間)配置:x/z 邊界 ── */
+const ZONES={
+  /* 2026-10-29 James：人多的房間放大、整體比例放大。舊版 x -31~31／z -21~29。
+     南緣仍停在 z=26，v1 廠房（z 32 起）與部門產線（z 52 起）位置不變。 */
+  ceo:     {x0:-18,x1:18, z0:-62,z1:-48, color:0xb8860b, name:'👑 CEO 指揮層', tone:'#ffd700'},
+  war:     {x0:-40,x1:-20,z0:-62,z1:-48, color:0x3a1024, name:'🚨 戰情會議室', tone:'#ff5566'},
+  brk:     {x0: 20,x1: 40,z0:-62,z1:-48, color:0x2e2210, name:'☕ 茶水間',     tone:'#d9a05b'},
+  dev:     {x0:-40,x1:-28,z0:-46,z1:-24, color:0x1a4a6e, name:'⚙️ 開發團隊',   tone:'#00bfff'},
+  mkt:     {x0:-26,x1:  4,z0:-46,z1:-24, color:0x14501e, name:'📣 行銷團隊',   tone:'#39ff14'},
+  inv:     {x0:  6,x1: 40,z0:-46,z1:-24, color:0x5e3a10, name:'📊 投資團隊',   tone:'#ff8c00'},
+  sales:   {x0:-40,x1:-14,z0:-22,z1: -6, color:0x5c2547, name:'🎯 銷售+人脈',  tone:'#ff69b4'},
+  brand:   {x0:-12,x1: 18,z0:-22,z1: -6, color:0x0f4a4a, name:'🔮 品牌+內容',  tone:'#00d4d4'},
+  personal:{x0: 20,x1: 40,z0:-22,z1: -6, color:0x2d2560, name:'🧑‍⚕️ 個人顧問', tone:'#7c6fff'},
+  ops:     {x0:-40,x1: 40,z0: -4,z1: 12, color:0x4a4416, name:'🏆 營運支援層', tone:'#ffd700'},
+  platform:{x0:-40,x1: 40,z0: 14,z1: 26, color:0x0d3d4a, name:'📱 平台專家組', tone:'#22d3ee'}
+};
+const STC={running:0x39ff14,standby:0xff8c00,frozen:0x6b7280};
+
+/* ── 三主題 token 庫(規格:THEMES-design.md;midnight=現況 baseline)── */
+const THEMES={
+  midnight:{
+    css:{bg:'#0a0a1a',panel:'#12122a',border:'#2a2a5a',text:'#e0e0ff',accent:'#7c6fff',gold:'#ffd700',green:'#39ff14',orange:'#ff8c00',red:'#ff4444'},
+    font:{pixel:"'Press Start 2P','Noto Sans TC',monospace",canvas:"'Noto Sans TC',sans-serif"},
+    ui:{barBg:'rgba(10,10,26,.88)',legendBg:'rgba(10,10,26,.88)',infoBg:'rgba(13,13,43,.94)',todoBg:'rgba(13,13,43,.95)',
+      hint:'#667',infoText:'#bbc',hoverBorder:'#7c6fff',hoverGlow:'none',
+      btnOnBg:'#7c6fff',btnOnBorder:'#7c6fff',btnOnText:'#fff',goldDim:'#b8860b',btnGameOnText:'#fff',
+      shadowInk:'#000',titleShadow:'0 0 12px #ffd700,2px 2px 0 #000',
+      toastBg:'#ffd700',toastText:'#0a0a1a',toastBorder:'#fff',toastShadow:'5px 5px 0 #000',
+      todoRowBg:'rgba(124,111,255,.05)',todoRowHover:'rgba(124,111,255,.15)',chipBg:'rgba(124,111,255,.9)'},
+    fx:{overlay:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.07) 3px,rgba(0,0,0,.07) 6px)'},
+    scene:{bg:0x0a0a1a,fog:0x0a0a1a,fogNear:150,fogFar:300,wall:0x2a2a5a},
+    ground:{floor:0x0d0d24},
+    grid:{main:0x2a2a5a,sub:0x1a1a3a},
+    light:{ambient:0x8888bb,ambientI:.75,dir:0xffffff,dirI:.85,point:0x7c6fff,pointI:.6,pointDist:120},
+    desk:{top:0x3a3050,leg:0x222240,screen:0x111128,screenEmisI:.55},
+    person:{skin:0xffd9b0,hair:0x222233,hairCEO:0xffd700,eye:0x111122,leg:0x1a1a30},
+    lamp:{running:0x39ff14,standby:0xff8c00,frozen:0x6b7280},
+    label:{person:'#fff',bubble:'#ffffff',shadow:'#000',shadowBlur:8,chipText:'#fff'},
+    zone:{
+      ceo:{color:0xb8860b,tone:'#ffd700'},war:{color:0x3a1024,tone:'#ff5566'},brk:{color:0x2e2210,tone:'#d9a05b'},
+      dev:{color:0x1a4a6e,tone:'#00bfff'},mkt:{color:0x14501e,tone:'#39ff14'},inv:{color:0x5e3a10,tone:'#ff8c00'},
+      sales:{color:0x5c2547,tone:'#ff69b4'},brand:{color:0x0f4a4a,tone:'#00d4d4'},personal:{color:0x2d2560,tone:'#7c6fff'},
+      ops:{color:0x4a4416,tone:'#ffd700'},platform:{color:0x0d3d4a,tone:'#22d3ee'}},
+    furniture:{warTable:0x552233,warGlow:0xff5566,warScreen:0x111128,warScreenEmis:0xff5566,warScreenEmisI:.5,
+      coffee:0x7a4a20,coffeeEmis:0xd9a05b,coffeeEmisI:.25,vending:0x224a7a,vendingEmis:0x00bfff,vendingEmisI:.35,
+      tableTop:0x5a3a1a,tableLeg:0x33220f}
+  },
+  press:{
+    css:{bg:'#F4F0E6',panel:'#FBF7EC',border:'#141311',text:'#141311',accent:'#FF3B00',gold:'#8A6508',green:'#12A94D',orange:'#D96A00',red:'#C0272E'},
+    font:{pixel:"'Syne','Noto Sans TC',sans-serif",canvas:"'Syne','Noto Sans TC',sans-serif"},
+    ui:{barBg:'rgba(244,240,230,.92)',legendBg:'rgba(244,240,230,.92)',infoBg:'rgba(251,247,236,.96)',todoBg:'rgba(251,247,236,.96)',
+      hint:'#6E6758',infoText:'#45403A',hoverBorder:'#FF3B00',hoverGlow:'none',
+      btnOnBg:'#141311',btnOnBorder:'#141311',btnOnText:'#F4F0E6',goldDim:'#8A6508',btnGameOnText:'#F4F0E6',
+      shadowInk:'#141311',titleShadow:'2px 2px 0 rgba(20,19,17,.15)',
+      toastBg:'#141311',toastText:'#F4F0E6',toastBorder:'#FF3B00',toastShadow:'5px 5px 0 rgba(20,19,17,.2)',
+      todoRowBg:'rgba(20,19,17,.04)',todoRowHover:'rgba(255,59,0,.10)',chipBg:'rgba(20,19,17,.92)'},
+    fx:{overlay:'radial-gradient(rgba(20,19,17,.055) 1px,transparent 1.2px) 0 0/4px 4px'},
+    scene:{bg:0xEFE9DB,fog:0xEFE9DB,fogNear:150,fogFar:300,wall:0x141311},
+    ground:{floor:0xE5DECB},
+    grid:{main:0xB8AE94,sub:0xD5CDB6},
+    light:{ambient:0xFFF4E2,ambientI:.95,dir:0xFFFFFF,dirI:.75,point:0xFFFFFF,pointI:.15,pointDist:120},
+    desk:{top:0xD9B98C,leg:0x8A6B4A,screen:0x2B2823,screenEmisI:.30},
+    person:{skin:0xFFD9B0,hair:0x2A2420,hairCEO:0xE8A80C,eye:0x201C18,leg:0x33302A},
+    lamp:{running:0x12A94D,standby:0xEE7B00,frozen:0x8A8F98},
+    label:{person:'#141311',bubble:'#141311',shadow:'#F4F0E6',shadowBlur:6,chipText:'#F4F0E6'},
+    zone:{
+      ceo:{color:0xF0E096,tone:'#8A6508'},war:{color:0xF2C4C0,tone:'#C0272E'},brk:{color:0xE3C7A6,tone:'#8A5A2B'},
+      dev:{color:0xC7DDF0,tone:'#0B6BA8'},mkt:{color:0xCDE6C4,tone:'#237A33'},inv:{color:0xF5D6A0,tone:'#A05C00'},
+      sales:{color:0xF0CDE0,tone:'#BC3E78'},brand:{color:0xC4E5DF,tone:'#0E7C7B'},personal:{color:0xD8D0F0,tone:'#5B4EC2'},
+      ops:{color:0xE3DEA4,tone:'#7A7010'},platform:{color:0xC5E3EA,tone:'#0E7490'}},
+    furniture:{warTable:0x8A3438,warGlow:0xC0272E,warScreen:0x2B2823,warScreenEmis:0xC0272E,warScreenEmisI:.3,
+      coffee:0x9A6A3C,coffeeEmis:0xC98A4A,coffeeEmisI:.12,vending:0x3E6E9E,vendingEmis:0x9CC8E8,vendingEmisI:.12,
+      tableTop:0xC79C6A,tableLeg:0x8A6B45}
+  },
+  foundry:{
+    css:{bg:'#140B08',panel:'#1F1209',border:'#4A2A1A',text:'#FFE3C8',accent:'#FF7A3D',gold:'#FFC24D',green:'#45E852',orange:'#FFAA1E',red:'#FF4B3E'},
+    font:{pixel:"'Silkscreen','Noto Sans TC',monospace",canvas:"'Silkscreen','Noto Sans TC',monospace"},
+    ui:{barBg:'rgba(20,11,8,.88)',legendBg:'rgba(20,11,8,.88)',infoBg:'rgba(31,18,9,.95)',todoBg:'rgba(31,18,9,.95)',
+      hint:'#B08A6E',infoText:'#EBC9A9',hoverBorder:'#FF7A3D',hoverGlow:'0 0 14px rgba(255,122,61,.35)',
+      btnOnBg:'#FF7A3D',btnOnBorder:'#FF7A3D',btnOnText:'#140B08',goldDim:'#6E4A0E',btnGameOnText:'#FFE3C8',
+      shadowInk:'#000',titleShadow:'0 0 14px #FF7A3D,2px 2px 0 #000',
+      toastBg:'#FFC24D',toastText:'#140B08',toastBorder:'#FFE3C8',toastShadow:'5px 5px 0 #000',
+      todoRowBg:'rgba(255,122,61,.06)',todoRowHover:'rgba(255,122,61,.16)',chipBg:'rgba(255,122,61,.92)'},
+    fx:{overlay:'repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.10) 3px,rgba(0,0,0,.10) 6px),radial-gradient(120% 60% at 50% 115%,rgba(255,122,61,.10),transparent 60%)'},
+    scene:{bg:0x140B08,fog:0x140B08,fogNear:140,fogFar:290,wall:0x50301C},
+    ground:{floor:0x1C100A},
+    grid:{main:0x4A2C1A,sub:0x2A1910},
+    light:{ambient:0x8A6A55,ambientI:.65,dir:0xFFD2A8,dirI:.55,point:0xFF7A3D,pointI:.9,pointDist:140},
+    desk:{top:0x4A3020,leg:0x241611,screen:0x140A07,screenEmisI:.70},
+    person:{skin:0xF2C79A,hair:0x1F1310,hairCEO:0xFFC24D,eye:0x140B08,leg:0x261711},
+    lamp:{running:0x45E852,standby:0xFFAA1E,frozen:0x8C97A6},
+    label:{person:'#FFEFD9',bubble:'#FFEFD9',shadow:'#000',shadowBlur:8,chipText:'#140B08'},
+    zone:{
+      ceo:{color:0x6E4A0E,tone:'#FFC94F'},war:{color:0x521015,tone:'#FF4B3E'},brk:{color:0x3E2415,tone:'#E09A5B'},
+      dev:{color:0x14384A,tone:'#3FC1F0'},mkt:{color:0x14402A,tone:'#3FE07C'},inv:{color:0x5A3A08,tone:'#FFA028'},
+      sales:{color:0x501F35,tone:'#FF6FA5'},brand:{color:0x0E3D3B,tone:'#2FD8C8'},personal:{color:0x33204F,tone:'#A98BFF'},
+      ops:{color:0x453310,tone:'#D9A82E'},platform:{color:0x123A48,tone:'#7FD4FF'}},
+    furniture:{warTable:0x6E1F26,warGlow:0xFF4B3E,warScreen:0x140A07,warScreenEmis:0xFF4B3E,warScreenEmisI:.55,
+      coffee:0x7A4520,coffeeEmis:0xE09A5B,coffeeEmisI:.30,vending:0x1C4258,vendingEmis:0x3FC1F0,vendingEmisI:.35,
+      tableTop:0x6E4426,tableLeg:0x3A2412}
+  }
+};
+window.THEMES=THEMES;
+const THEME_ORDER=['midnight','press','foundry'];
+const THEME_BTN={midnight:'🌙 午夜',press:'📰 日報',foundry:'🔥 地心'};
+let CUR=THEMES.midnight,CUR_NAME='midnight';
+
+/* ── 材質/物件 registry(主題切換用;只收 reference,不改幾何/佈局)── */
+const REG={ground:null,grid:null,wallMats:[],zoneFloor:{},zoneLabel:{},desks:[],furniture:{}};
+
+/* legend(切主題要重繪 inline background,抽成函式) */
+function renderLegend(){
+  document.getElementById('legend').innerHTML=
+    Object.values(ZONES).map(z=>`<div class="li"><span class="sw" style="background:${z.tone}"></span>${z.name}</div>`).join('')+
+    `<div class="hint">🖱️ 左鍵拖曳移動 · 右鍵拖曳旋轉 · 滾輪縮放<br>點小人看檔案 · 綠燈=運轉中</div>`;
+}
+renderLegend();
+
+/* ── three 基礎 ── */
+const canvas=document.getElementById('c');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x0a0a1a);
+scene.fog=new THREE.Fog(0x0a0a1a,150,300);
+const camera=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,.1,500);
+const controls=new THREE.OrbitControls(camera,canvas);
+controls.enableDamping=true;controls.dampingFactor=.08;
+controls.maxPolarAngle=Math.PI/2.05;controls.minDistance=15;controls.maxDistance=140;
+/* 2026-11-12 James：左鍵＝沿地面自由平移（像拖地圖），右鍵＝旋轉，滾輪＝縮放；手機單指平移、雙指縮放旋轉。
+   原本左鍵是繞中心旋轉、平移藏在右鍵，看起來像被釘在中間。 */
+controls.mouseButtons={LEFT:THREE.MOUSE.PAN,MIDDLE:THREE.MOUSE.DOLLY,RIGHT:THREE.MOUSE.ROTATE};
+controls.touches={ONE:THREE.TOUCH.PAN,TWO:THREE.TOUCH.DOLLY_ROTATE};
+controls.screenSpacePanning=false; /* 沿地面平移，不會把視角中心拖到天上或地底 */
+const PAN_BOUNDS={x0:-50,x1:50,z0:-70,z1:90}; /* 辦公室 x±40 z-62~26、產線到 z80：視角中心留在場景內，拖不到找不回來 */
+let interacting=false;
+controls.addEventListener('start',()=>{interacting=true;});
+controls.addEventListener('end',()=>{interacting=false;});
+let lastMove=0;controls.addEventListener('change',()=>{lastMove=performance.now();});
+
+const amb=new THREE.AmbientLight(0x8888bb,.75);scene.add(amb);
+const dir=new THREE.DirectionalLight(0xffffff,.85);dir.position.set(30,60,20);scene.add(dir);
+const pt=new THREE.PointLight(0x7c6fff,.6,120);pt.position.set(0,30,0);scene.add(pt);
+
+/* 地板 + 網格 */
+const groundM=new THREE.MeshLambertMaterial({color:0x0d0d24});
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),groundM);
+ground.rotation.x=-Math.PI/2;ground.position.y=-.02;scene.add(ground);
+REG.ground=groundM;
+const grid=new THREE.GridHelper(200,100,0x2a2a5a,0x1a1a3a);grid.position.y=0;scene.add(grid);
+REG.grid=grid;
+
+/* 文字 sprite(字色/影色/字型烤進貼圖 → 全部吃「當前主題」CUR) */
+function label(text,size,color,bg){
+  const cv=document.createElement('canvas');const s=cv.getContext('2d');
+  cv.width=512;cv.height=128;
+  if(bg){s.fillStyle=bg;s.fillRect(0,0,512,128);}
+  s.font=`900 ${size||44}px ${CUR.font.canvas}`;
+  s.textAlign='center';s.textBaseline='middle';
+  s.shadowColor=CUR.label.shadow;s.shadowBlur=CUR.label.shadowBlur;
+  s.fillStyle=color||CUR.label.person;s.fillText(text,256,64);
+  const tex=new THREE.CanvasTexture(cv);tex.minFilter=THREE.LinearFilter;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthWrite:false}));
+  if(!bg){const sb=CUR.label.shadowBlur||0;sp.userData.inkW=Math.min(1,(s.measureText(text).width+sb*2)/512);sp.userData.inkH=Math.min(1,((size||44)*1.15+sb*2)/128);} /* 墨水區比例：給月台泡泡碰撞用 */
+  return sp;
+}
+
+/* ── 房間 ── */
+Object.entries(ZONES).forEach(([id,z])=>{
+  const w=z.x1-z.x0,d=z.z1-z.z0,cx=(z.x0+z.x1)/2,cz=(z.z0+z.z1)/2;
+  const floorM=new THREE.MeshLambertMaterial({color:z.color});
+  const floor=new THREE.Mesh(new THREE.BoxGeometry(w,.18,d),floorM);
+  floor.position.set(cx,.09,cz);scene.add(floor);
+  REG.zoneFloor[id]=floorM;
+  // 邊框矮牆
+  const wallM=new THREE.MeshLambertMaterial({color:0x2a2a5a});
+  REG.wallMats.push(wallM);
+  const mk=(ww,dd,px,pz)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(ww,.9,dd),wallM);m.position.set(px,.45,pz);scene.add(m);};
+  mk(w+0.3,.3,cx,z.z0); mk(w+0.3,.3,cx,z.z1); mk(.3,d,z.x0,cz); mk(.3,d,z.x1,cz);
+  // 房間名牌
+  const lb=label(z.name,46,z.tone);
+  lb.scale.set(18,4.5,1);lb.position.set(cx,3.4,z.z0+4.6);scene.add(lb);
+  REG.zoneLabel[id]=lb;
+});
+
+/* 房名牌重生成(canvas 烤字:切主題必重烤,舊貼圖要 dispose) */
+function rebuildZoneLabels(){
+  Object.entries(ZONES).forEach(([id,z])=>{
+    const old=REG.zoneLabel[id];
+    if(old){scene.remove(old);if(old.material.map)old.material.map.dispose();old.material.dispose();}
+    const cx=(z.x0+z.x1)/2;
+    const lb=label(z.name,46,z.tone);
+    lb.scale.set(18,4.5,1);lb.position.set(cx,3.4,z.z0+4.6);scene.add(lb);
+    REG.zoneLabel[id]=lb;
+  });
+}
+
+/* ── 戰情室 & 茶水間家具 ── */
+(function(){
+  const w=ZONES.war,cx=(w.x0+w.x1)/2;
+  // 大會議桌
+  const tblM=new THREE.MeshLambertMaterial({color:0x552233});
+  const tbl=new THREE.Mesh(new THREE.BoxGeometry(8,.5,2.6),tblM);
+  tbl.position.set(cx,.85,w.z0+3.6);scene.add(tbl);
+  const glowM=new THREE.MeshBasicMaterial({color:0xff5566});
+  const glow=new THREE.Mesh(new THREE.BoxGeometry(7.4,.06,2.1),glowM);
+  glow.position.set(cx,1.13,w.z0+3.6);scene.add(glow);
+  // 大簡報螢幕
+  const scrM=new THREE.MeshLambertMaterial({color:0x111128,emissive:0xff5566,emissiveIntensity:.5});
+  const scr=new THREE.Mesh(new THREE.BoxGeometry(6.5,3,.22),scrM);
+  scr.position.set(cx,2.7,w.z0+.45);scene.add(scr);
+  const b=ZONES.brk;
+  // 咖啡機 & 販賣機
+  const cofM=new THREE.MeshLambertMaterial({color:0x7a4a20,emissive:0xd9a05b,emissiveIntensity:.25});
+  const cof=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.8,1),cofM);
+  cof.position.set(b.x1-2,.9,b.z0+1.2);scene.add(cof);
+  const vendM=new THREE.MeshLambertMaterial({color:0x224a7a,emissive:0x00bfff,emissiveIntensity:.35});
+  const vend=new THREE.Mesh(new THREE.BoxGeometry(1.4,2.2,1),vendM);
+  vend.position.set(b.x0+2,1.1,b.z0+1.2);scene.add(vend);
+  // 咖啡圓桌 ×3
+  const brkTops=[],brkLegs=[];
+  for(let i=0;i<3;i++){
+    const tx=b.x0+3.5+i*4.5;
+    const topM=new THREE.MeshLambertMaterial({color:0x5a3a1a});
+    const top=new THREE.Mesh(new THREE.CylinderGeometry(.85,.85,.12,12),topM);
+    top.position.set(tx,.95,b.z0+5);scene.add(top);brkTops.push(topM);
+    const legMt=new THREE.MeshLambertMaterial({color:0x33220f});
+    const leg=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,.95,8),legMt);
+    leg.position.set(tx,.48,b.z0+5);scene.add(leg);brkLegs.push(legMt);
+  }
+  REG.furniture={warTable:tblM,warGlow:glowM,warScreen:scrM,coffee:cofM,vending:vendM,brkTops,brkLegs};
+})();
+
+/* ── 桌子(材質收進 REG.desks,螢幕 emissive 吃 zone tone)── */
+function desk(x,z,zoneId){
+  const g=new THREE.Group();
+  const topM=new THREE.MeshLambertMaterial({color:0x3a3050});
+  const top=new THREE.Mesh(new THREE.BoxGeometry(1.9,.14,1),topM);
+  top.position.y=.85;g.add(top);
+  const legM=new THREE.MeshLambertMaterial({color:0x222240});
+  [[-.8,-.4],[.8,-.4],[-.8,.4],[.8,.4]].forEach(([lx,lz])=>{
+    const l=new THREE.Mesh(new THREE.BoxGeometry(.12,.85,.12),legM);
+    l.position.set(lx,.42,lz);g.add(l);
+  });
+  const monM=new THREE.MeshLambertMaterial({color:0x111128,emissive:new THREE.Color(ZONES[zoneId].tone),emissiveIntensity:.55});
+  const mon=new THREE.Mesh(new THREE.BoxGeometry(.9,.55,.07),monM);
+  mon.position.set(0,1.25,-.3);g.add(mon);
+  g.position.set(x,0,z);
+  REG.desks.push({top:topM,leg:legM,mon:monM,zoneId});
+  return g;
+}
+
+/* ── 小人(voxel person)── */
+const people=[];
+function person(agent,zone,px,pz,isCEO){
+  if(!LOOK_OFF){const look=LOOKS[agent.code]||LOOK_CACHE[agent.code]||(isCEO?null:(LOOK_CACHE[agent.code]=lookGen(agent)));
+    if(look)return personLook(agent,zone,px,pz,isCEO,look);}
+  const tone=new THREE.Color(zone.tone);
+  const g=new THREE.Group();
+  // 身體
+  const bodyM=new THREE.MeshLambertMaterial({color:tone});
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.62,.75,.4),bodyM);
+  body.position.y=.85;g.add(body);
+  // 頭
+  const skinM=new THREE.MeshLambertMaterial({color:0xffd9b0});
+  const head=new THREE.Mesh(new THREE.BoxGeometry(.5,.5,.46),skinM);
+  head.position.y=1.5;g.add(head);
+  // 頭髮
+  const hairM=new THREE.MeshLambertMaterial({color:isCEO?0xffd700:0x222233});
+  const hair=new THREE.Mesh(new THREE.BoxGeometry(.52,.16,.48),hairM);
+  hair.position.y=1.78;g.add(hair);
+  // 眼睛(臉朝 -z)
+  const eyeM=new THREE.MeshBasicMaterial({color:0x111122});
+  [-0.12,0.12].forEach(ex=>{
+    const e=new THREE.Mesh(new THREE.BoxGeometry(.07,.09,.03),eyeM);
+    e.position.set(ex,1.52,-.245);g.add(e);
+  });
+  // 腳
+  const legM2=new THREE.MeshLambertMaterial({color:0x1a1a30});
+  const l1=new THREE.Mesh(new THREE.BoxGeometry(.2,.5,.24),legM2);l1.position.set(-.16,.25,0);g.add(l1);
+  const l2=l1.clone();l2.position.x=.16;g.add(l2);
+  // 手
+  const armM=new THREE.MeshLambertMaterial({color:tone.clone().multiplyScalar(.75)});
+  const a1=new THREE.Mesh(new THREE.BoxGeometry(.16,.6,.2),armM);a1.position.set(-.4,.9,0);g.add(a1);
+  const a2=a1.clone();a2.position.x=.4;g.add(a2);
+  // 狀態燈
+  const st=isCEO?'running':agent.st;
+  const lampM=new THREE.MeshBasicMaterial({color:STC[st]||STC.running});
+  const lamp=new THREE.Mesh(new THREE.SphereGeometry(.11,8,8),lampM);
+  lamp.position.y=2.15;g.add(lamp);
+  // 名牌
+  const nm=label(isCEO?agent.code:agent.role,42,CUR.label.person);
+  nm.scale.set(6,1.5,1);nm.position.y=2.75;nm.userData.nameTag=true;g.add(nm);
+  let crownM=null;
+  if(isCEO){ // 皇冠
+    crownM=new THREE.MeshLambertMaterial({color:0xffd700,emissive:0xffd700,emissiveIntensity:.4});
+    const crown=new THREE.Mesh(new THREE.BoxGeometry(.3,.18,.3),crownM);
+    crown.position.y=1.95;g.add(crown);
+    g.scale.setScalar(1.22);
+  }
+  g.position.set(px,0,pz);
+  g.userData={agent,zone,isCEO,home:new THREE.Vector3(px,0,pz),
+    target:new THREE.Vector3(px,0,pz),phase:Math.random()*Math.PI*2,
+    speed:.008+Math.random()*.007,wait:Math.random()*300,lamp,st,
+    nameSprite:nm,parts:{head,arms:[a1,a2]},
+    mats:{body:bodyM,arm:armM,skin:skinM,hair:hairM,eye:eyeM,leg:legM2,lamp:lampM,crown:crownM}};
+  scene.add(g);people.push(g);
+  return g;
+}
+
+/* ── 可愛人物造型（2026-11-12 James：髮型、臉型、穿著、身材每個人都不一樣，有男有女；CEO 層看過喜歡 → 鋪到全公司）──
+   規格出自 web-design-stylist：約 2.3 頭身、大眼＋腮紅、衣服主色維持部門色、差異靠輪廓。
+   CEO 層 5 位是手排的（LOOKS）；其他人用代號算出造型（lookGen），名冊不變就每次都長一樣。
+   少數人是「撞到別人或同部門髮色滿了」才換到下一組，所以名冊順序或成員變了，這幾位可能換造型（目前 3 位）。
+   網址加 ?look=0 可以整個關掉、回到舊款小人（比對或效能出問題時用）。
+   🔴 結構約定：g.children[1] 一定是頭（v1 產線 line-3d.js 用它做轉頭）；頭髮、眼睛、眼鏡、皇冠全部掛在頭底下，
+      所以點頭、轉頭是整顆頭一起動。手用 userData.parts.arms 取，不要再用 children[7][8] 這種位置。 */
+const LOOK_OFF=new URLSearchParams(location.search).get('look')==='0';
+const LOOK_BODY={S:[.52,.52,.36,.26],M:[.60,.60,.40,.32],L:[.54,.66,.38,.40],R:[.72,.60,.48,.28],B:[.70,.64,.44,.32]}; /* 身寬,身高,身深,腿高 */
+const LOOK_FACE={round:[.76,.70,.64],square:[.80,.66,.64],long:[.68,.76,.60],small:[.70,.66,.60]};
+const LOOK_SKIN={porcelain:0xFFE2C6,apricot:0xFFD9B0,wheat:0xE8B080,honey:0xC68A5A,deep:0x8D5A3B};
+const LOOK_HAIR={ink:0x3A3550,brown:0x6B4226,auburn:0xB5532A,flax:0xE3B75A,silver:0xB9C0CF,berry:0xD9628F};
+const LOOK_WHITE=0xF4F1EA,LOOK_CHAR=0x2B2B3A;
+const LOOKS={
+  Elon:   {body:'B',face:'square',skin:'apricot',  hair:'H4',hairColor:'auburn',outfit:'G6',acc:['brows']},
+  Jobs:   {body:'L',face:'long',  skin:'wheat',    hair:'H1',hairColor:'silver',outfit:'G2',acc:['roundGlasses','beard']},
+  Buffett:{body:'R',face:'round', skin:'porcelain',hair:'H5',hairColor:'silver',outfit:'G1',acc:['squareGlasses','squint','blush']},
+  Jassy:  {body:'M',face:'round', skin:'honey',    hair:'H3',hairColor:'ink',   outfit:'G5',acc:['bowtie','smile','blush']},
+  Cook:   {body:'M',bw:.54,face:'small',skin:'porcelain',hair:'H2',hairColor:'brown',outfit:'G3',acc:['headphones']}
+};
+/* 以真人命名、性別明確的角色固定性別表現；其他人由代號決定，大約一半一半 */
+const LOOK_GENDER={'investment-cathie-wood':'f',naval:'m','donald-miller':'m',mrbeast:'m','steve-jobs':'m','alex-hormozi':'m',
+  'keith-ferrazzi':'m','sean-ellis':'m','david-spinks':'m','dankoe-media-director':'m','oldwang-advisor':'m',
+  'serenity-advisor':'f','suozhang-advisor':'m','special-advisor':'m'};
+const LOOK_SIGS=new Set(Object.values(LOOKS).map(l=>[l.hair,l.hairColor,l.outfit,l.body,l.face].join('|')));
+const LOOK_DEPT_HAIR={}; /* 部門|髮色 → 人數 */
+const LOOK_CACHE={};     /* 代號 → 算出來的造型（本尊、部門產線分身、v1 產線分身共用同一份） */
+function lookRng(str,salt){ /* 代號 → 固定亂數序列 */
+  let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
+  let a=(h+salt*977)|0;
+  return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+}
+function lookGen(agent){
+  let look=null;
+  for(let n=0;n<24;n++){ /* 撞到別人的整套造型、或同部門這個髮色已經 3 人，就換一組；最多試 24 次（第 12 次起不再管髮色人數） */
+    const r=lookRng(agent.code,n),pick=a=>a[Math.floor(r()*a.length)],chance=p=>r()<p;
+    const coin=r()<.5?'f':'m',f=(LOOK_GENDER[agent.code]||coin)==='f';
+    const skin=pick(['porcelain','apricot','apricot','wheat','wheat','honey','deep']);
+    let colors=skin==='deep'?['auburn','silver','flax','berry','brown']:['ink','ink','brown','brown','auburn','flax','silver','berry'];
+    if(agent.deptId==='ops')colors=colors.filter(c=>c!=='flax'); /* 金色部門不用金髮，頭髮會跟衣服糊在一起 */
+    let hair=pick(f?['H6','H7','H8','H9','H10','H2','H6','H9','H7','H8']:['H1','H2','H3','H4','H10','H2','H1','H3','H4','H5']);
+    let hairColor=pick(colors);
+    if(hair==='H5')hairColor='silver';
+    const body=pick(f?['S','S','M','M','L','R']:['M','M','L','R','B','S']);
+    const face=pick(f?['round','round','small','small','long','square']:['round','square','square','long','small','long']);
+    const outfit=pick(f?['G4','G4','G2','G3','G6L','G7','G5']:['G1','G2','G3','G5','G6','G7','G6']);
+    const acc=[];
+    const glasses=chance(.22);if(glasses)acc.push(chance(.5)?'roundGlasses':'squareGlasses');
+    if(f){if(chance(.75))acc.push('lashes');if(chance(.6))acc.push('blush');if(chance(.3))acc.push('earrings');if(chance(.25)&&hair!=='H10')acc.push('hairclip');}
+    else{if(chance(.15))acc.push('beard');if(chance(.25))acc.push('brows');if(chance(.15))acc.push('blush');}
+    if(chance(.25))acc.push('smile');else if(!glasses&&chance(.08))acc.push('squint');
+    if(chance(.07))acc.push('headphones');
+    if(outfit==='G5'&&chance(.4))acc.push('bowtie');
+    look={body,face,skin,hair,hairColor,outfit,acc,female:f};
+    const sig=[hair,hairColor,outfit,body,face].join('|');
+    const dk=agent.deptId+'|'+hairColor;
+    if(!LOOK_SIGS.has(sig)&&((LOOK_DEPT_HAIR[dk]||0)<3||n>=12)){LOOK_SIGS.add(sig);LOOK_DEPT_HAIR[dk]=(LOOK_DEPT_HAIR[dk]||0)+1;break;}
+  }
+  return look;
+}
+/* 把一堆方塊併成一塊幾何（同一個人身上同材質的零件只畫一次）。
+   不併的話全公司每幀多畫 700 多次，實測比舊款小人慢 2.7 倍（15.6ms vs 5.8ms）；併完一個人約 12 次，跟舊款差不多。 */
+function lookMerge(geos){
+  let n=0;geos.forEach(ge=>{n+=ge.attributes.position.array.length;});
+  const pos=new Float32Array(n),nor=new Float32Array(n);let o=0;
+  geos.forEach(ge=>{pos.set(ge.attributes.position.array,o);nor.set(ge.attributes.normal.array,o);o+=ge.attributes.position.array.length;ge.dispose();});
+  const m=new THREE.BufferGeometry();
+  m.setAttribute('position',new THREE.BufferAttribute(pos,3));m.setAttribute('normal',new THREE.BufferAttribute(nor,3));
+  return m;
+}
+function lookBox(w,h,d,x,y,z,ry,rz){
+  const ge=new THREE.BoxGeometry(w,h,d).toNonIndexed();
+  if(ry)ge.rotateY(ry);if(rz)ge.rotateZ(rz);
+  ge.translate(x,y,z);return ge;
+}
+/* 工作帽（產線分身用；部門產線 dlClone 與 v1 產線 line-3d.js 共用）。
+   有造型的人一律不戴：帽子會把髮型整個蓋住，一排看過去又變成同一個人，高髮型（油頭、刺蝟、丸子、蓬蓬捲）還會穿出帽子。
+   分身跟本尊的差別改看「頭上沒有狀態燈」。只有 ?look=0 的舊款小人會戴。 */
+function addCap(p,capM){
+  if(p.userData.look)return;
+  const cap=new THREE.Mesh(new THREE.BoxGeometry(.56,.2,.52),capM);cap.position.y=1.9;p.add(cap);
+  const brim=new THREE.Mesh(new THREE.BoxGeometry(.56,.05,.3),capM);brim.position.set(0,1.83,-.38);p.add(brim);
+}
+/* 換主題：個人膚色髮色不跟主題換，衣服零件跟部門色走（office3d 與 line-3d.js 共用） */
+function lookRetheme(p){
+  const u=p.userData,m=u.mats,k=u.lookMats;
+  m.skin.color.setHex(LOOK_SKIN[u.look.skin]);m.hair.color.setHex(LOOK_HAIR[u.look.hairColor]);
+  if(k.sleeveFixed)m.arm.color.setHex(LOOK_WHITE);else if(k.armAsBody)m.arm.color.set(u.zone.tone);
+  k.dark.forEach(x=>{x.color.set(u.zone.tone);x.color.multiplyScalar(.6);});
+}
+function personLook(agent,zone,px,pz,isCEO,look){
+  const tone=new THREE.Color(zone.tone);
+  const g=new THREE.Group();
+  const B=LOOK_BODY[look.body],F=LOOK_FACE[look.face];
+  const bw=look.bw||B[0],bh=B[1],bd=B[2],lg=B[3],W=F[0],H=F[1],D=F[2];
+  const bodyTop=lg+bh,headY=bodyTop+H/2,HT=bodyTop+H,eyeY=headY-.06,fz=-(D/2),bz=-(bd/2),cy=lg+bh/2;
+  const has=k=>look.acc.indexOf(k)>=0;
+  const L=c=>new THREE.MeshLambertMaterial({color:c}),BM=c=>new THREE.MeshBasicMaterial({color:c});
+
+  /* 零件先丟進「桶子」（掛在身上或頭上 × 哪個材質），最後每個桶子併成一塊。
+     座標一律照「整個人」的高度寫；掛在頭上的桶子會自動換算成相對頭中心。 */
+  const buckets=[],lazy={},darkMs=[];
+  const bucket=(onHead,mat)=>{const b={onHead,mat,geos:[]};buckets.push(b);return b;};
+  const put=(b,w,h,d,x,y,z,ry,rz)=>{b.geos.push(lookBox(w,h,d,x,b.onHead?y-headY:y,z,ry,rz));};
+  const lz=(key,onHead,mk)=>lazy[key]||(lazy[key]=bucket(onHead,mk()));
+  const bodyM=L(tone.clone()),skinM=L(LOOK_SKIN[look.skin]),hairM=L(LOOK_HAIR[look.hairColor]),eyeM=BM(0x111122),legM2=L(0x1a1a30);
+  const bBody=bucket(false,bodyM),bHead=bucket(true,skinM),bHair=bucket(true,hairM),bEye=bucket(true,eyeM),bLeg=bucket(false,legM2);
+  const bDark=()=>lz('dark',false,()=>{const m=L(tone.clone().multiplyScalar(.6));darkMs.push(m);return m;}); /* 深＝部門色×0.6，換主題要跟 */
+  const bWhite=()=>lz('white',false,()=>L(LOOK_WHITE)),bChar=()=>lz('char',false,()=>L(LOOK_CHAR));
+  const hWhite=()=>lz('hwhite',true,()=>BM(LOOK_WHITE)),hChar=()=>lz('hchar',true,()=>L(LOOK_CHAR));
+
+  put(bBody,bw,bh,bd,0,cy,0);
+  put(bHead,W,H,D,0,headY,0);
+
+  /* ── 頭髮 ── */
+  const hs=look.hair;let seat=.08,top=.08;
+  const hair=(w,h,d,x,y,z,ry)=>put(bHair,w,h,d,x,y,z,ry);
+  const backPiece=h=>hair(W+.04,h,.10,0,HT+.08-h/2,D/2+.02);
+  const sidePieces=(w,h,d,z)=>[-1,1].forEach(sx=>hair(w,h,d,sx*(W/2+.02),HT+.06-h/2,z));
+  if(hs==='H1'){hair(W+.04,.10,D+.04,0,HT-.01,0);seat=.06;top=.06;}                       /* 平頭 */
+  else if(hs==='H5'){hair(W+.04,.22,.10,0,HT-.28,D/2);                                    /* 地中海：頭頂露膚色 */
+    [-1,1].forEach(sx=>hair(.08,.22,D-.02,sx*(W/2+.02),HT-.28,.01));seat=0;top=0;}
+  else if(hs==='H10'){hair(W+.18,.32,D+.18,0,HT+.04,0);backPiece(.30);seat=.20;top=.20;}   /* 蓬蓬捲 */
+  else{
+    hair(W+.04,.14,D+.04,0,HT+.01,0); /* 頭頂髮蓋 */
+    if(hs==='H2'){backPiece(.28);hair(.44,.12,.08,.14,HT-.10,fz-.02);}                     /* 旁分 */
+    if(hs==='H3'){backPiece(.28);hair(W,.16,.26,0,HT+.16,-.16);top=.24;}                   /* 油頭 */
+    if(hs==='H4'){backPiece(.28);(isCEO?[-.24,.24]:[-.24,0,.24]).forEach(x=>hair(.16,.16,.16,x,HT+.16,0,Math.PI/4));top=.24;} /* 刺蝟 */
+    if(hs==='H6'){backPiece(.52);sidePieces(.10,.46,D*.7,.06);hair(W,.12,.08,0,HT-.10,fz-.02);} /* 鮑伯 */
+    if(hs==='H7'){backPiece(.26);hair(.18,.42,.18,0,HT-.16,D/2+.18);}                      /* 高馬尾 */
+    if(hs==='H8'){backPiece(.26);[-.28,.28].forEach(x=>hair(.24,.24,.24,x,HT+.16,0));top=.28;} /* 雙丸子 */
+    if(hs==='H9'){backPiece(.82);sidePieces(.08,.52,.30,.12);}                              /* 長直髮 */
+  }
+
+  /* ── 眼睛、臉、配件（都掛在頭上） ── */
+  const glasses=has('roundGlasses')||has('squareGlasses');
+  const ez=fz-(glasses?.035:.012),eh=has('squint')?.04:.14,ew=has('squint')?.14:.10;
+  [-.18,.18].forEach(ex=>put(bEye,ew,eh,.03,ex,eyeY,ez));
+  if(has('lashes')){[-.18,.18].forEach(x=>put(bEye,.15,.03,.03,x,eyeY+eh/2+.015,ez));}
+  if(has('blush')){const b=bucket(true,BM(look.skin==='honey'||look.skin==='deep'?0xD9706A:0xFF9EAA));
+    [-.27,.27].forEach(x=>put(b,.12,.06,.02,x,eyeY-.12,fz-(has('beard')?.016:.01)));} /* 有鬍子時往前一點，不然跟鬍子正面同平面會閃 */
+  if(has('brows')){[-.18,.18].forEach(x=>hair(.14,.04,.03,x,eyeY+.13,fz-.012));}
+  if(has('beard')){hair(W+.02,.20,.10,0,headY-H/2+.10,fz+.03);}
+  if(has('smile')&&!has('beard')){put(hWhite(),.16,.05,.02,0,eyeY-.17,fz-.01);} /* 有鬍子的人嘴被蓋住，不畫 */
+  if(has('squareGlasses')){[-.18,.18].forEach(x=>put(hWhite(),.18,.16,.02,x,eyeY,fz-.012));put(hChar(),.60,.04,.03,0,eyeY+.07,fz-.02);}
+  if(has('roundGlasses')){
+    [-.18,.18].forEach(x=>{const ge=new THREE.CylinderGeometry(.10,.10,.02,12).toNonIndexed();ge.rotateX(Math.PI/2);ge.translate(x,eyeY-headY,fz-.012);hWhite().geos.push(ge);});
+    put(hChar(),.60,.035,.03,0,eyeY,fz-.02);}
+  if(has('earrings')){const b=bucket(true,BM(0xFFD24D));[-1,1].forEach(sx=>put(b,.06,.06,.06,sx*(W/2+.03),headY-.20,-.04));}
+  if(has('hairclip')){put(bucket(true,BM(0xFF7FA8)),.14,.05,.04,.22,HT-.13,fz-(hs==='H2'||hs==='H6'?.075:.035));} /* 有瀏海的髮型夾在瀏海外面 */
+  if(has('headphones')){put(hChar(),W+.06,.05,.08,0,HT+.10,0);
+    [-1,1].forEach(sx=>put(hChar(),.08,.18,.18,sx*(W/2+.04),headY,0));if(top<.13)top=.13;}
+
+  /* ── 腳 ── */
+  [-1,1].forEach(sx=>put(bLeg,.2,lg,.24,sx*bw*.26,lg/2,0));
+
+  /* ── 服裝 ── */
+  const of=look.outfit,whiteSleeve=of==='G5';
+  if(of==='G1'){ /* 西裝領帶 */
+    put(bWhite(),.16,.36,.02,0,bodyTop-.20,bz-.01);
+    put(bucket(false,L(0xD9434F)),.07,.30,.03,0,bodyTop-.22,bz-.025);
+    [-1,1].forEach(sx=>put(bDark(),.12,.32,.02,sx*.15,bodyTop-.19,bz-.012,0,sx*-.21));
+  }
+  if(of==='G2'){put(bDark(),bw+.04,.10,bd+.04,0,bodyTop-.05,0);put(bDark(),bw+.02,.08,bd+.02,0,lg+.04,0);} /* 高領毛衣 */
+  if(of==='G3'){ /* 帽T：帽兜跟身體同色 */
+    put(bBody,.46,.22,.18,0,bodyTop-.09,bd/2+.07);
+    put(bDark(),.30,.14,.02,0,lg+.16,bz-.01);
+    [-.07,.07].forEach(x=>put(bWhite(),.03,.16,.02,x,bodyTop-.12,bz-.01));
+  }
+  if(of==='G4'){ /* 洋裝：裙襬蓋住大半條腿 */
+    const sh=Math.max(.12,lg-.14);
+    put(bBody,bw+.18,sh,bd+.14,0,lg-sh/2,0);
+    put(bDark(),bw+.03,.06,bd+.03,0,lg+.04,0);
+  }
+  if(whiteSleeve){put(bWhite(),.14,.44,.02,0,cy,bz-.01);} /* 襯衫背心：白袖＋胸口白條 */
+  if(of==='G6'||of==='G6L'){ /* 開襟外套（G6L＝長版，多一圈下襬） */
+    put(look.female?bWhite():bChar(),.20,.50,.02,0,cy,bz-.008);
+    [-1,1].forEach(sx=>put(bDark(),.18,.50,.03,sx*.19,cy,bz-.016));
+    if(of==='G6L')put(bDark(),bw+.06,.16,bd+.06,0,lg-.06,0);
+  }
+  if(has('bowtie')){put(bChar(),.18,.08,.04,0,bodyTop-.07,bz-.03);}
+
+  /* ── 皇冠（掛在頭上） ── */
+  let crownM=null;
+  if(isCEO){
+    crownM=new THREE.MeshLambertMaterial({color:0xffd700,emissive:0xffd700,emissiveIntensity:.4});
+    const bc=bucket(true,crownM),cz=hs==='H3'?.12:0,cb=HT+seat+(has('headphones')?.05:0);
+    put(bc,.36,.08,.36,0,cb+.04,cz);
+    [-.14,0,.14].forEach(x=>put(bc,.08,.12,.08,x,cb+.14,cz));
+    top=Math.max(top,cb-HT+.20);
+    g.scale.setScalar(1.22);
+  }
+
+  /* ── 併塊、組裝：[0] 身體 [1] 頭（順序見上方 🔴），其餘桶子各一塊 ── */
+  const meshOf=b=>new THREE.Mesh(lookMerge(b.geos),b.mat);
+  g.add(meshOf(bBody));
+  const head=meshOf(bHead);head.position.y=headY;g.add(head);
+  buckets.forEach(b=>{if(b!==bBody&&b!==bHead&&b.geos.length)(b.onHead?head:g).add(meshOf(b));});
+  /* 手：要單獨擺動，不併 */
+  const armM=L(whiteSleeve?LOOK_WHITE:(of==='G2'?tone.clone():tone.clone().multiplyScalar(.75)));
+  const arms=[-1,1].map(sx=>{
+    const short=of==='G7'; /* 短袖：上半截是袖子，前臂是膚色，掛在袖子底下一起擺 */
+    const a=new THREE.Mesh(new THREE.BoxGeometry(.14,short?.22:.46,.18),armM);
+    a.position.set(sx*(bw/2+.07),bodyTop-(short?.13:.25),0);g.add(a);
+    if(short){const fore=new THREE.Mesh(new THREE.BoxGeometry(.12,.26,.16),skinM);fore.position.y=-.24;a.add(fore);}
+    return a;
+  });
+
+  /* ── 狀態燈、名牌：高度跟著髮型算 ── */
+  const st=isCEO?'running':agent.st;
+  const lampY=HT+top+.20,tagY=lampY+.60;
+  const lampM=new THREE.MeshBasicMaterial({color:STC[st]||STC.running});
+  const lamp=new THREE.Mesh(new THREE.SphereGeometry(.11,8,8),lampM);
+  lamp.position.y=lampY;g.add(lamp);
+  const nm=label(isCEO?agent.code:agent.role,42,CUR.label.person);
+  nm.scale.set(6,1.5,1);nm.position.y=tagY;nm.userData.nameTag=true;g.add(nm);
+
+  g.position.set(px,0,pz);
+  g.userData={agent,zone,isCEO,home:new THREE.Vector3(px,0,pz),
+    target:new THREE.Vector3(px,0,pz),phase:Math.random()*Math.PI*2,
+    speed:.008+Math.random()*.007,wait:Math.random()*300,lamp,st,
+    nameSprite:nm,look,tagY,headY,parts:{head,arms},
+    lookMats:{dark:darkMs,sleeveFixed:whiteSleeve,armAsBody:of==='G2'},
+    mats:{body:bodyM,arm:armM,skin:skinM,hair:hairM,eye:eyeM,leg:legM2,lamp:lampM,crown:crownM}};
+  scene.add(g);people.push(g);
+  return g;
+}
+
+/* 小人名牌重生成(切主題:舊 sprite dispose → 用新主題字色重烤) */
+function rebuildPersonLabel(p){
+  const u=p.userData,old=u.nameSprite;
+  if(old){p.remove(old);if(old.material.map)old.material.map.dispose();old.material.dispose();}
+  const nm=label(u.isCEO?u.agent.code:u.agent.role,42,CUR.label.person);
+  nm.scale.set(6,1.5,1);nm.position.y=u.tagY||2.75;nm.userData.nameTag=true;p.add(nm);
+  u.nameSprite=nm;
+  if(window.__dlLine||u.isClone)dlTag(p,true);
+}
+
+/* ── 佈局:部門房間裡排小人+桌子 ── */
+function layoutZone(zoneId,agents,isCEO){
+  const z=ZONES[zoneId];
+  const w=z.x1-z.x0-3,d=z.z1-z.z0-3;
+  const n=agents.length;
+  const cols=Math.ceil(Math.sqrt(n*(w/Math.max(d,1))))||1;
+  const rows=Math.ceil(n/cols);
+  agents.forEach((a,i)=>{
+    const c=i%cols,r=Math.floor(i/cols);
+    const px=z.x0+1.5+(w/(cols))*(c+.5);
+    const pz=z.z0+1.5+(d/(rows))*(r+.5);
+    if(!isCEO)scene.add(desk(px,pz-1.05,zoneId));
+    person(a,z,px,pz,isCEO);
+  });
+}
+layoutZone('ceo',D.command,true);
+['dev','mkt','platform','inv','sales','brand','ops','personal'].forEach(id=>{
+  layoutZone(id,ALL.filter(a=>a.deptId===id),false);
+});
+
+/* ── Live 專案層：code→小人 索引 + green 專案熱度標記 ── */
+const agentByCode={};
+people.forEach(p=>{ const c=p.userData.agent&&p.userData.agent.code; if(c)agentByCode[c]=p; });
+
+const hotCodes=new Set();
+(D.projects||[]).forEach(pr=>{ if(pr.tier==='green')(pr.agents||[]).forEach(c=>hotCodes.add(c)); });
+people.forEach(p=>{ const c=p.userData.agent&&p.userData.agent.code; p.userData.hot=hotCodes.has(c); });
+
+
+/* ── 🏭 部門產線（2026-10-29 James：每個部門都要有自己的流水線，小人分派上線）──
+   位置：v1 南翼廠房（z 32~48）再往南，3×3 九條線。按「🏭 上產線」全員走過去。
+   🔴 誠實規則：這層只顯示「誰站在哪個崗位」，不顯示任何產量數字。
+      有真帳本的三條（投資／銷售／開發）標「v2 接線中」，其餘標「無即時帳本」。
+      沒人負責的工站螢幕是暗的——空就是空，不演。現在的名冊下每個工位都有人；
+      人比工位少的線會合併相鄰工位（見 buildDeptLines）。真的出現暗工位＝名冊或崗位表有洞，開機自檢會跳警告。
+   2026-11-12 James：平常辦公室、產線都要有人 → 每個有指派的崗位放一個分身（見 dlClone）。 */
+const ZONE_ID=new Map(Object.entries(ZONES).map(([k,v])=>[v,k]));
+const DL_GRID=[['ceo','inv','dev'],['mkt','brand','platform'],['sales','ops','personal']];
+const DL_COLS=[[-33,-12],[-10.5,10.5],[12,33]],DL_ROWS=[[52,60],[62,70],[72,80]];
+const DL_STATIONS={
+  ceo:['①情報','②拆解','③裁決','④交辦','⑤覆盤'],
+  inv:['①選題材','②查證','③登記','④等待','⑤對答案','⑥記分'],
+  dev:['①拷問','②規格','③工單','④TDD','⑤雙審','⑥上線'],
+  mkt:['①熱點','②選題','③文案','④腳本','⑤開發信','⑥日報'],
+  brand:['①選題','②寫文','③配圖','④影片','⑤審稿','⑥交件'],
+  platform:['①格式','②演算法','③紅線','④排程','⑤覆盤'],
+  sales:['①接觸','②需求','③報價','④談判','⑤成交'],
+  ops:['①收件','②研究','③產出','④覆核','⑤歸檔'],
+  personal:['①問題','②找文獻','③讀全文','④回顧']
+};
+const DL_LEDGER={inv:'📒 帳本：投資三本登記簿（v2 接線中）',sales:'📒 帳本：NocoDB CRM（v2 接線中）',dev:'📒 帳本：n8n 執行紀錄（v2 接線中）'};
+/* 崗位指派：依 agent 實際職責；沒列到的補到人最少的站 */
+const DL_HINT={Jassy:0,Buffett:1,Elon:2,Cook:3,Jobs:4,
+  'narrative-hunter':0,'bottleneck-hunter':0,'investment-altcoin':0,'investment-mexc':0,
+  /* 2026-11-12 James：6 位外部顧問搬到個人顧問線；投資②查證改由本來就在做共識查核／長線審視的兩位接 */
+  'camillo-mispricing-hunter':1,'investment-cathie-wood':1,
+  'senior-investment-advisor':0,'serenity-advisor':0,'oldwang-advisor':1,'special-advisor':2,'suozhang-advisor':2,'dual-mentor-advisor':3,
+  'swing-master':2,'daytrading-master':2,'investment-daytrader':2,'ict-chart-analyst':2,'flow-swing-expert':2,
+  'macro-cycle-officer':3,'investment-ceo':3,'investment-fx':3,'quant-validator':4,'bubble-top-auditor':4,
+  'investment-risk':5,'investment-analyst':5,'investment-team':5,
+  'dev-team':0,'architect':1,'frontend-dev':2,'n8n-dev':3,'qa':4,'devops':5,
+  'trend-hunter':0,'competitor-monitor':0,'marketing-director':1,'marketing-team':1,'prompt-enhancer':1,
+  'copywriter':2,'case-study-writer':2,'youtube-script':3,'email-outreach':4,'report-builder':5,
+  'dankoe-media-director':0,'mrbeast':0,'steve-jobs':0,'naval':1,'donald-miller':1,'fomo-ta-creator':1,
+  'visual-creator':2,'web-design-stylist':2,'video-director':3,'viral-critic':4,'product-marketing-context':4,'content-shipper':5,
+  'threads-expert':0,'ig-expert':0,'x-expert':1,'linkedin-expert':2,'fb-expert':3,'tiktok-expert':4,
+  'crm-manager':0,'keith-ferrazzi':0,'sales-contacts':0,'sales-company':0,'sean-ellis':1,'david-spinks':1,'sales-competitive':1,
+  'alex-hormozi':4,'sales-strategy':2,'sales-opportunity':3,
+  'swarm-coordinator':0,'project-manager':0,'customer-success':0,'data-analyst':1,'seo-specialist':1,'finance-tax':2,
+  'legal-advisor':3,'equity-structure-architect':3,'source-auditor':3,'knowledge-architect':4,
+  'research-scholar':1};
+const DL={belts:[],screens:[],clones:[],lanes:[]};
+/* 產線分身（2026-11-12 James：辦公室、產線都要有人）：本尊照常坐辦公室，分身站在產線崗位。
+   比照 v1 產線分身（line-3d.js）：不進 people（不算人數、不跟著開會／喝咖啡）、沒有狀態燈。
+   有造型的人不戴工作帽（原因見 addCap）；?look=0 的舊款小人才戴。
+   按「上產線」時本尊會走過來，分身就隱藏，不會兩個疊在一起。凍結中的人不放分身。 */
+function dlClone(p){
+  const u=p.userData,s=u.lineSlot;
+  const c=person(u.agent,u.zone,s.x,s.z,u.isCEO);
+  people.pop();
+  const cu=c.userData;
+  c.remove(cu.lamp);cu.lamp.geometry.dispose();cu.lamp=null;
+  let capM=null;
+  if(!u.isCEO){ /* 高管頭上已經有皇冠 */
+    capM=new THREE.MeshLambertMaterial({color:new THREE.Color(u.zone.tone).multiplyScalar(.75)});
+    addCap(c,capM);
+  }
+  Object.assign(cu,{isClone:true,lineSlot:s,lineStation:u.lineStation,lineCol:u.lineCol,lineRow:u.lineRow,lineWalk:u.lineWalk,
+    arms:cu.parts.arms,capM,orig:p});
+  dlTag(c,true);
+  return c;
+}
+function dlBeltTex(tone){
+  const cv=document.createElement('canvas');cv.width=128;cv.height=32;const s=cv.getContext('2d');
+  s.fillStyle='#16162a';s.fillRect(0,0,128,32);
+  s.strokeStyle=tone;s.globalAlpha=.8;s.lineWidth=5;
+  for(let x=-16;x<144;x+=32){s.beginPath();s.moveTo(x,5);s.lineTo(x+11,16);s.lineTo(x,27);s.stroke();}
+  const t=new THREE.CanvasTexture(cv);t.wrapS=THREE.RepeatWrapping;return t;
+}
+function dlPlate(title,sub,tone,subColor,w,h){
+  const cv=document.createElement('canvas');cv.width=1024;cv.height=Math.round(1024*h/w);const s=cv.getContext('2d');
+  const H=cv.height;s.fillStyle='rgba(10,10,26,.72)';s.fillRect(0,0,1024,H);
+  s.textAlign='center';s.textBaseline='middle';
+  s.font=`900 ${Math.round(H*.5)}px ${CUR.font.canvas}`;s.fillStyle=tone;s.fillText(title,512,H*.36);
+  s.font=`700 ${Math.round(H*.24)}px ${CUR.font.canvas}`;s.fillStyle=subColor;s.fillText(sub,512,H*.8);
+  const t=new THREE.CanvasTexture(cv);t.minFilter=THREE.LinearFilter;
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t,transparent:true,depthWrite:false}));
+  m.rotation.x=-Math.PI/2;return m;
+}
+/* 上產線時名牌縮小＋依站位錯開高度（同站最多 6 人，原本 6 單位寬的名牌會疊成一團）；回辦公室還原 */
+function dlTag(p,on){
+  const u=p.userData,nm=u.nameSprite;if(!nm)return;
+  if(on&&u.lineSlot){nm.scale.set(3.2,.8,1);nm.position.y=(u.tagY?u.tagY-.3:2.45)+u.lineCol*.5+u.lineRow*.25;}
+  else{nm.scale.set(6,1.5,1);nm.position.y=u.tagY||2.75;}
+}
+/* ── 產線上的動作（2026-11-12 James：平常就要動——帶面跑＋光點流動、小人在崗位工作，還要走去輸送帶再走回來）──
+   每一站同一時間只有一個人離開座位：輪到的人走到兩排座位中間的走道、繞過桌子右邊走到輸送帶邊，處理一下再原路走回來。
+   姿勢完全由時間算出來（dlPose 不存狀態），所以分身跟「上產線」時的本尊走同一套，開機自檢也能把整輪掃一遍。
+   輸送帶上只有光點，不放箱子：這 9 條線還沒接即時帳本，放箱子會像真的有工單在跑。 */
+const DL_TURN=11,DL_SPD=1.7,DL_HOLD=1.8,DL_BELT=1.26; /* 每人一輪 11 秒：走過去、在帶邊停 1.8 秒、走回來，其餘時間在座位；帶速 1.26 單位／秒 */
+function dlPose(u,et){
+  const s=u.lineSlot,w=u.lineWalk,ts=et+w.off,desk={x:s.x,z:s.z,ry:0,stage:'desk'};
+  if(Math.floor(ts/DL_TURN)%w.turns!==w.k)return desk;
+  const t=ts%DL_TURN,tw=w.len/DL_SPD;
+  let d,back=false;
+  if(t<tw)d=t*DL_SPD;
+  else if(t<tw+DL_HOLD)return {x:w.pts[3][0],z:w.pts[3][1],ry:0,stage:'belt'};
+  else if(t<tw*2+DL_HOLD){d=w.len-(t-tw-DL_HOLD)*DL_SPD;back=true;}
+  else return desk;
+  for(let i=0;i<3;i++){
+    const a=w.pts[i],b=w.pts[i+1],L=Math.hypot(b[0]-a[0],b[1]-a[1]);
+    if(d<=L||i===2){const f=Math.min(1,d/L),sg=back?-1:1;
+      return {x:a[0]+(b[0]-a[0])*f,z:a[1]+(b[1]-a[1])*f,ry:Math.atan2((b[0]-a[0])*sg,(b[1]-a[1])*sg)+Math.PI,stage:'walk'};}
+    d-=L;
+  }
+}
+function dlAnimate(p,et){
+  const u=p.userData,q=dlPose(u,et),a=u.arms;
+  p.position.x=q.x;p.position.z=q.z;
+  if(q.stage==='walk'){ /* 走路：手前後擺、小跳 */
+    const k=Math.sin(et*10+u.phase)*.6;a[0].rotation.x=k;a[1].rotation.x=-k;
+    p.position.y=Math.abs(Math.sin(et*10+u.phase))*.07;p.rotation.y=q.ry;
+  }else if(q.stage==='belt'){ /* 在輸送帶邊：面向帶子，兩手往前伸 */
+    const k=1+Math.sin(et*9+u.phase)*.25;a[0].rotation.x=k;a[1].rotation.x=k;
+    p.position.y=0;p.rotation.y=0;
+  }else{ /* 在座位：打字、身體微微左右轉 */
+    const k=Math.sin(et*11+u.phase)*.38;a[0].rotation.x=k;a[1].rotation.x=-k;
+    p.position.y=Math.abs(Math.sin(et*4+u.phase))*.03;p.rotation.y=Math.sin(et*.7+u.phase)*.12;
+  }
+}
+/* 把每條線的整輪動作模擬一遍。傳入 pose 函式是為了能拿壞掉的版本來驗這個檢查本身會不會叫
+   （2026-11-12 試過：全員同時離座、永不離座、穿桌、踩上輸送帶、瞬移、貼著同事走，都抓得到）。 */
+function dlMotionCheck(pose){
+  const bad=new Set(),STEP=.2,gcd=(a,b)=>b?gcd(b,a%b):a;
+  DL.lanes.forEach(l=>{
+    const ws=l.workers.filter(u=>u.st!=='frozen');if(!ws.length)return;
+    /* 各站輪數不同，取最小公倍數才是整條線的一整輪 */
+    const cyc=ws.reduce((m,u)=>m*u.lineWalk.turns/gcd(m,u.lineWalk.turns),1)*DL_TURN,seen=new Set();
+    let prev=null;
+    for(let t=0;t<cyc;t+=STEP){
+      const qs=ws.map(u=>pose(u,t)),out={};
+      qs.forEach((q,n)=>{const u=ws[n],who=u.agent.code;
+        if(!q){bad.add(who+' 算不出姿勢');return;}
+        if(q.stage!=='desk'){const i=u.lineStation.idx;out[i]=(out[i]||0)+1;if(q.stage==='belt')seen.add(u);
+          qs.forEach((o,m)=>{if(m!==n&&o&&Math.hypot(o.x-q.x,o.z-q.z)<.45)bad.add(who+' 走路時撞到 '+ws[m].agent.code);});}
+        else if(q.x!==u.lineSlot.x||q.z!==u.lineSlot.z)bad.add(who+' 在座位時不在自己的位置');
+        if(prev&&prev[n]&&Math.hypot(q.x-prev[n].x,q.z-prev[n].z)>DL_SPD*STEP+.02)bad.add(who+' 瞬間移動');
+        if(q.x<l.x0||q.x>l.x1||q.z<l.z0||q.z>l.z1)bad.add(who+' 走出產線地板');
+        if(q.z<l.bz+.75)bad.add(who+' 走上輸送帶');
+        if(l.desks.some(sx=>Math.abs(q.x-sx)<1.28&&Math.abs(q.z-l.deskZ)<.86))bad.add(who+' 穿過桌子'); /* 桌子半寬 .95、半深 .5，再留半個身寬 */
+      });
+      Object.keys(out).forEach(i=>{if(out[i]>1)bad.add(l.name+' 第 '+(+i+1)+' 站同時有 '+out[i]+' 個人離開座位');});
+      prev=qs;
+    }
+    ws.forEach(u=>{if(!seen.has(u))bad.add(u.agent.code+' 一整輪都沒走到輸送帶');});
+  });
+  return [...bad];
+}
+(function buildDeptLines(){
+  DL_GRID.forEach((row,ri)=>row.forEach((id,ci)=>{
+    const z=ZONES[id];let stn=DL_STATIONS[id];
+    const [x0,x1]=DL_COLS[ci],[z0,z1]=DL_ROWS[ri];
+    const cx=(x0+x1)/2,cz=(z0+z1)/2,w=x1-x0,d=z1-z0;
+    /* 地板＋霓虹邊 */
+    const slab=new THREE.Mesh(new THREE.BoxGeometry(w,.12,d),new THREE.MeshLambertMaterial({color:z.color}));
+    slab.position.set(cx,.06,cz);scene.add(slab);
+    const edge=new THREE.LineSegments(new THREE.EdgesGeometry(slab.geometry),new THREE.LineBasicMaterial({color:new THREE.Color(z.tone)}));
+    edge.position.copy(slab.position);scene.add(edge);
+    /* 輸送帶（線上有人就一直轉，見 step 最後一段） */
+    const bz=z0+2.5,bx0=x0+1.2,bx1=x1-1.2,bl=bx1-bx0;
+    const base=new THREE.Mesh(new THREE.BoxGeometry(bl,.42,1.1),new THREE.MeshLambertMaterial({color:0x1b1b2e}));
+    base.position.set(cx,.33,bz);scene.add(base);
+    const tex=dlBeltTex(z.tone);tex.repeat.set(bl/1.4,1);
+    const top=new THREE.Mesh(new THREE.PlaneGeometry(bl,.95),new THREE.MeshBasicMaterial({map:tex}));
+    top.rotation.x=-Math.PI/2;top.position.set(cx,.55,bz);scene.add(top);
+    const lights=[0,1,2].map(()=>{ /* 帶面上流動的光點（不是貨物） */
+      const m=new THREE.Mesh(new THREE.PlaneGeometry(.6,.7),new THREE.MeshBasicMaterial({color:new THREE.Color(z.tone),transparent:true,opacity:0,depthWrite:false,blending:THREE.AdditiveBlending}));
+      m.rotation.x=-Math.PI/2;m.position.set(bx0,.58,bz);m.visible=false;scene.add(m);return m;});
+    const belt={tex,lights,bx0,bl,live:0};DL.belts.push(belt);
+    [bx0,bx1].forEach(rx=>{const r=new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,1.2,10),new THREE.MeshLambertMaterial({color:0x44445a}));
+      r.rotation.x=Math.PI/2;r.position.set(rx,.35,bz);scene.add(r);});
+    /* 線名＋帳本：平貼在南側地板（工人最多兩排，z0+6.4 之後是空的），不浮空就不會擋到隔壁線的人 */
+    const led=DL_LEDGER[id];
+    const plate=dlPlate(z.name+' 產線',led||'○ 無即時帳本 · 只顯示崗位',z.tone,led?'#ffd700':'#8890a8',w-1.6,1.5);
+    plate.position.set(cx,.14,z1-.82);scene.add(plate);
+    /* 崗位分派 */
+    const members=people.filter(p=>ZONE_ID.get(p.userData.zone)===id);
+    let slots,loose=false;const rest=[];
+    if(members.length&&members.length<stn.length){
+      /* 人比工位少（例：展示模式 ?demo=1 藏掉 5 位顧問，個人顧問線只剩 2 人顧 4 站）：
+         相鄰工位合併成跟人數一樣多，一人顧一段（「②找文獻·③讀全文·④回顧」）。不留空工位，也不假裝有人。 */
+      const S=stn.length,m=members.length,all=stn;
+      const hint=p=>{const h=DL_HINT[p.userData.agent&&p.userData.agent.code];return h===undefined?99:h;};
+      const sorted=members.slice().sort((a,b)=>hint(a)-hint(b)),hs=sorted.map(hint);
+      /* 切點放在每個人原本的工位上，這樣每個人原本那一站一定落在自己顧的那一段裡
+         （2026-11-12 James：學術文獻研究員要站在有「②找文獻」的那一站 →「①問題」｜「②找文獻·③讀全文·④回顧」）。
+         有人沒指定工位、或兩個人指定同一站時沒有處理，退回平均切（loose，自檢不查這條，主控台留一行警告）。 */
+      loose=!hs.every((h,j)=>h<S&&(j===0||h>hs[j-1]));
+      if(loose)console.warn('產線「'+z.name+'」合併工位：有人沒指定工位或指定同一站，改用平均切');
+      const cut=j=>j===0?0:j===m?S:(loose?Math.floor(j*S/m):hs[j]);
+      stn=sorted.map((_,j)=>all.slice(cut(j),cut(j+1)).join('·'));
+      slots=sorted.map(p=>[p]);
+    }else{
+      slots=stn.map(()=>[]);
+      members.forEach(p=>{const h=DL_HINT[p.userData.agent&&p.userData.agent.code];
+        (h!==undefined&&h<stn.length)?slots[h].push(p):rest.push(p);});
+      rest.forEach(p=>{let k=0;slots.forEach((q,i)=>{if(q.length<slots[k].length)k=i;});slots[k].push(p);});
+    }
+    const sp=bl/stn.length,deskZ=bz+1.45;
+    stn.forEach((name,i)=>{
+      const sx=bx0+sp*(i+.5);
+      const dk=desk(sx,deskZ,id);scene.add(dk);
+      const on=slots[i].length>0,mon=dk.children[5].material;
+      mon.emissiveIntensity=on?.55:.06;DL.screens.push({m:mon,on,ph:i+ri*3+ci,lane:z.name,stn:name});
+      const tag=label(name,Math.min(52,Math.floor(470/name.length)),on?z.tone:'#667','rgba(10,10,26,.8)');const tf=Math.max(1,Math.min(sp/3.5,name.length/9));tag.scale.set(3.2*tf,.8*tf,1); /* 合併後的站名較長：字級依字數縮到塞得進 512 寬的牌子，站距夠寬就把整塊牌子放大補回來 */tag.position.set(sx,2.05,bz-.95);scene.add(tag);
+      const ws=slots[i];
+      ws.forEach((p,k)=>{
+        const r=Math.floor(k/3),inRow=Math.min(3,ws.length-r*3),c=k%3;
+        const u=p.userData;
+        u.lineSlot=new THREE.Vector3(sx+(c-(inRow-1)/2)*.85,0,deskZ+1.05+r*.95);
+        u.lineStation={lane:id,idx:i,name,loose};u.lineCol=c;u.lineRow=r;
+        u.arms=u.parts.arms;
+        /* 走去輸送帶的路線：座位 → 兩排座位中間的走道 → 橫移到桌子右邊的空隙 → 輸送帶邊。同站的人輪流走（至少 3 輪，人少的站不會一直有人在走）。
+           走道離前後排各 .475：貼著桌子走會穿過同排同事、壓到桌緣（規範審 2026-11-12）。最後一站的空隙往內縮，不然人會站到滾筒外面 */
+        const sl=u.lineSlot,zc=deskZ+1.525,gx=Math.min(sx+Math.min(sp/2,1.55),bx1-.2),zb=bz+.95;
+        u.lineWalk={k,turns:Math.max(ws.length,3),off:i*3.7+ri*1.9+ci*5.3,pts:[[sl.x,sl.z],[sl.x,zc],[gx,zc],[gx,zb]],len:Math.abs(sl.z-zc)+(gx-sl.x)+(zc-zb)};
+        if(u.st!=='frozen')DL.clones.push(dlClone(p));
+      });
+    });
+    belt.live=members.filter(p=>p.userData.st!=='frozen').length; /* 整條線沒有人在線上就不轉 */
+    DL.lanes.push({id,name:z.name,x0,x1,z0,z1,bz,deskZ,desks:stn.map((_,i)=>bx0+sp*(i+.5)),workers:members.map(p=>p.userData)});
+  }));
+})();
+/* 開機自檢（規範審 2026-11-12）：下面這幾件事有別處程式依賴，壞了只會安靜地出錯，所以當場喊出來 */
+(function dlSelfCheck(){
+  const bad=[];
+  if(people.length!==ALL.length+D.command.length)bad.push('人數 '+people.length+' ≠ 名冊 '+(ALL.length+D.command.length)+'（分身混進 people？）');
+  if(DL.clones.some(c=>people.includes(c)))bad.push('有分身被算進 people');
+  const dark=DL.screens.filter(s=>!s.on);if(dark.length)bad.push('部門產線有工位沒人：'+dark.map(s=>s.lane+' '+s.stn).join('、'));
+  people.concat(DL.clones).forEach(p=>{const u=p.userData;
+    if(p.children[1]!==u.parts.head||u.parts.head.material!==u.mats.skin||u.parts.arms.length!==2||u.parts.arms.some(x=>x.material!==u.mats.arm))
+      bad.push((u.agent&&u.agent.code)+' 的零件跑掉（children[1] 要是頭、parts.arms 要是兩隻手）');});
+  if(!LOOK_OFF){const sig=new Map();people.forEach(p=>{const l=p.userData.look;if(!l){bad.push(p.userData.agent.code+' 沒有造型');return;}
+    const k=[l.hair,l.hairColor,l.outfit,l.body,l.face].join('|');if(sig.has(k))bad.push(p.userData.agent.code+' 跟 '+sig.get(k)+' 整套造型一樣');sig.set(k,p.userData.agent.code);});}
+  people.forEach(p=>{const u=p.userData,st=u.lineStation,h=DL_HINT[u.agent.code];if(!st||st.loose||h===undefined)return;
+    const want=DL_STATIONS[st.lane][h];if(want&&!st.name.includes(want))bad.push(u.agent.code+' 應該在「'+want+'」，卻站在「'+st.name+'」');});
+  const mv=dlMotionCheck(dlPose);bad.push(...mv.slice(0,6));if(mv.length>6)bad.push('…動作檢查另有 '+(mv.length-6)+' 項');
+  if(bad.length){console.error('office3d 自檢失敗',bad);setTimeout(()=>toast('⚠️ 人物自檢失敗：'+bad[0]),1500);}
+  window.__officeSelfCheck=bad;
+})();
+
+/* ── 相機 ── */
+let camTween=null;
+function setCam(mode,btn){
+  document.querySelectorAll('.btn.view').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  const from=camera.position.clone();
+  const to=mode==='top'?new THREE.Vector3(0,140,-17.99):new THREE.Vector3(57,63,42);
+  const t0=performance.now();
+  camTween=(t)=>{
+    const p=Math.min((t-t0)/700,1),e=1-Math.pow(1-p,3);
+    camera.position.lerpVectors(from,to,e);
+    controls.target.set(0,0,-18);
+    if(p>=1)camTween=null;
+  };
+}
+camera.position.set(57,63,42);controls.target.set(0,0,-18);
+
+let autoRot=false;
+function toggleRot(b){autoRot=!autoRot;b.classList.toggle('on',autoRot);controls.autoRotate=autoRot;controls.autoRotateSpeed=.8;}
+
+/* ── 點擊小人 ── */
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
+let clickAt=null;
+canvas.addEventListener('pointerdown',e=>{clickAt=e.button===0?[e.clientX,e.clientY]:null;});
+canvas.addEventListener('pointerup',e=>{
+  if(e.button!==0||!clickAt)return;
+  const moved=Math.hypot(e.clientX-clickAt[0],e.clientY-clickAt[1]);clickAt=null;
+  if(moved>4)return; /* 這是拖曳，不是點擊 */
+  const cr=canvas.getBoundingClientRect();mouse.x=((e.clientX-cr.left)/cr.width)*2-1;mouse.y=-((e.clientY-cr.top)/cr.height)*2+1;
+  ray.setFromCamera(mouse,camera);
+  const hits=ray.intersectObjects(people.concat(DL.clones.filter(c=>c.visible)),true);
+  if(hits.length){
+    let g=hits[0].object;while(g.parent&&!g.userData.agent)g=g.parent;
+    if(g.userData.agent)showInfo(g.userData);
+  }else if(spotProj){
+    clearSpotlight();
+  }
+});
+const SPX={ceo:'👑',dev:'⚙️',mkt:'📣',platform:'📱',inv:'📊',sales:'🎯',brand:'🔮',ops:'🏆',personal:'🧑‍⚕️'};
+function showInfo(u){
+  const a=u.agent;
+  document.getElementById('isp').textContent=u.isCEO?(a.icon||'👑'):(SPX[a.deptId]||'🤖');
+  document.getElementById('inm').textContent=u.isCEO?a.code:a.role;
+  document.getElementById('idp').textContent=u.isCEO?(a.role+' · '+a.frame):(a.dept+(a.frame&&a.frame!=='—'?' · '+a.frame:''));
+  document.getElementById('itx').textContent=u.isCEO?a.desc:(a.note||'—');
+  document.getElementById('ibd').innerHTML=`<span class="ibd">${u.isCEO?a.frame:a.code}</span>`;
+  document.getElementById('info').classList.add('show');
+}
+function hideInfo(){document.getElementById('info').classList.remove('show');}
+
+/* ── 帝國待辦面板 ── */
+function tierDot(tier){ const c=(D.tierMeta[tier]&&D.tierMeta[tier].color)||'#888';
+  return `<span class="dot" style="background:${c}"></span>`; }
+
+function renderTodo(){
+  const P=D.projects||[];
+  const todos=[], decis=[];
+  P.forEach(p=>{
+    (p.todos||[]).forEach(t=>todos.push({p,t}));
+    (p.decisions||[]).forEach(t=>decis.push({p,t}));
+  });
+  const rowHtml=(o,cls)=>`<div class="row ${cls}" data-pj="${encodeURIComponent(o.p.name)}">`+
+    `${tierDot(o.p.tier)}<div>${o.t}<br><span class="pj">▸ ${o.p.name}</span></div></div>`;
+  const projRow=p=>`<div class="row" data-pj="${encodeURIComponent(p.name)}">`+
+    `${tierDot(p.tier)}<div>${p.name}<br><span class="pj">👥 ${(p.agents||[]).length} 人 · ${p.activity||''}</span></div></div>`;
+
+  document.getElementById('todo').innerHTML =
+    `<h3>⚠️ 等你決定（${decis.length}）</h3>`+
+    (decis.length?decis.map(o=>rowHtml(o,'deci')).join(''):`<div class="empty">🎉 沒有待決定</div>`)+
+    `<h3>📝 待完成工作（${todos.length}）</h3>`+
+    (todos.length?todos.map(o=>rowHtml(o,'')).join(''):`<div class="empty">🎉 沒有待辦</div>`)+
+    `<h3>🔦 專案（點看團隊）</h3>`+
+    P.map(projRow).join('');
+
+  // 綁定點擊 → 聚光
+  document.querySelectorAll('#todo .row').forEach(r=>{
+    r.addEventListener('click',()=>{
+      const name=decodeURIComponent(r.getAttribute('data-pj'));
+      const proj=P.find(x=>x.name===name);
+      if(proj)spotlight(proj);
+    });
+  });
+}
+renderTodo();
+
+function toggleTodo(btn){
+  const el=document.getElementById('todo');
+  const on=el.classList.toggle('show');
+  btn.classList.toggle('on',on);
+}
+
+/* ── 專案聚光 ── */
+let spotProj=null;
+
+function setPersonDim(p,on){
+  p.traverse(o=>{
+    const m=o.material; if(!m||m.opacity===undefined)return;
+    if(on){
+      if(m.userData.o0===undefined){ m.userData.o0=m.opacity; m.userData.t0=m.transparent; }
+      m.transparent=true; m.opacity=0.13;
+    }else if(m.userData.o0!==undefined){
+      m.opacity=m.userData.o0; m.transparent=m.userData.t0;
+      delete m.userData.o0; delete m.userData.t0;
+    }
+  });
+}
+function addChip(p,text){
+  const c=label(text,40,CUR.label.chipText,CUR.ui.chipBg);
+  c.scale.set(6.6,1.65,1); c.position.y=3.5; p.add(c); p.userData.chip=c;
+}
+function removeChip(p){
+  if(!p.userData.chip)return;
+  p.remove(p.userData.chip);
+  if(p.userData.chip.material.map)p.userData.chip.material.map.dispose();
+  p.userData.chip.material.dispose();
+  p.userData.chip=null;
+}
+
+function spotlight(proj){
+  clearSpotlight();
+  spotProj=proj;
+  const set=new Set(proj.agents||[]);
+  people.forEach(p=>{
+    const code=p.userData.agent&&p.userData.agent.code;
+    if(set.has(code)){ p.userData.hl=true; addChip(p,proj.name); }
+    else setPersonDim(p,true);
+  });
+  DL.clones.forEach(c=>setPersonDim(c,true));
+  const z=ZONES[proj.room];
+  if(z){ const cx=(z.x0+z.x1)/2,cz=(z.z0+z.z1)/2;
+    camGo(new THREE.Vector3(cx,0,cz),new THREE.Vector3(cx,26,cz+22)); }
+  toast(`🔦 ${proj.name} — ${proj.activity||''}`);
+}
+function clearSpotlight(){
+  people.forEach(p=>{ setPersonDim(p,false); p.userData.hl=false; removeChip(p); });
+  DL.clones.forEach(c=>setPersonDim(c,false));
+  spotProj=null;
+}
+
+/* ── 董事長遊戲:全員開會 / 茶水間 / 回工作 ── */
+let MODE='work',lastBub=0;
+const toastEl=document.createElement('div');toastEl.className='toast';document.body.appendChild(toastEl);
+let toastT=null;
+function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(()=>toastEl.classList.remove('show'),2800);}
+function bubble(p,text){
+  const b=label(text,54,CUR.label.bubble);b.scale.set(4.2,1.05,1);b.position.y=3.35;p.add(b);
+  setTimeout(()=>{p.remove(b);b.material.map.dispose();b.material.dispose();},1700);
+}
+const MEET_TXT=['收到!','馬上到!','Yes Sir!','📈','💡','衝!','$$$','筆記中📝'];
+const BRK_TXT=['☕','🍰','😄','哈哈','🎮','摸魚中'];
+function randIn(z){return new THREE.Vector3(
+  z.x0+1.2+Math.random()*(z.x1-z.x0-2.4),0,
+  z.z0+1.2+Math.random()*(z.z1-z.z0-2.4));}
+function warSeats(n){
+  const w=ZONES.war,seats=[],cols=12;
+  for(let i=0;i<n;i++){
+    const c=i%cols,r=Math.floor(i/cols);
+    seats.push(new THREE.Vector3(
+      w.x0+1.4+c*((w.x1-w.x0-2.8)/(cols-1)),0,w.z0+5.5+r*0.95));
+  }
+  return seats;
+}
+function camGo(target,pos){
+  const f=camera.position.clone(),ft=controls.target.clone(),t0=performance.now();
+  camTween=(t)=>{const q=Math.min((t-t0)/800,1),e=1-Math.pow(1-q,3);
+    camera.position.lerpVectors(f,pos,e);controls.target.lerpVectors(ft,target,e);
+    if(q>=1)camTween=null;};
+}
+function setMode(m,btn){
+  clearSpotlight();
+  MODE=m;
+  window.__dlLine=(m==='line');
+  if(m!=='line'){people.forEach(p=>{p.userData.arrived=false;dlTag(p,false);});}
+  else{people.forEach(p=>dlTag(p,true));}
+  const w=ZONES.war,bz=ZONES.brk;
+  if(m==='meeting'){
+    toast('📢 董事長召集全員戰情會議!');
+    const emp=people.filter(p=>!p.userData.isCEO&&p.userData.st!=='frozen');
+    const seats=warSeats(emp.length);
+    emp.forEach((p,i)=>{
+      p.userData.go=seats[i];
+      if(i%3===0)setTimeout(()=>bubble(p,MEET_TXT[i%MEET_TXT.length]),i*70);
+    });
+    people.filter(p=>p.userData.isCEO).forEach((p,i)=>{
+      p.userData.go=new THREE.Vector3(w.x0+3.3+i*2.2,0,w.z0+1.4);});
+    people.filter(p=>p.userData.st==='frozen').forEach(p=>bubble(p,'❄️ 凍結中'));
+    camGo(new THREE.Vector3((w.x0+w.x1)/2,0,w.z0+4),
+          new THREE.Vector3((w.x0+w.x1)/2+14,21,w.z0+23));
+  }else if(m==='break'){
+    toast('☕ 董事長請喝咖啡 — 全員休息!');
+    people.forEach(p=>{if(p.userData.st==='frozen')return;
+      p.userData.go=randIn(bz);p.userData.wait=120+Math.random()*300;});
+    camGo(new THREE.Vector3((bz.x0+bz.x1)/2,0,bz.z0+4),
+          new THREE.Vector3((bz.x0+bz.x1)/2-14,21,bz.z0+23));
+  }else if(m==='line'){
+    toast('🏭 董事長下令:全員分派到各部門產線!');
+    const list=people.filter(p=>p.userData.lineSlot&&p.userData.st!=='frozen');
+    list.forEach(p=>{p.userData.go=null;p.userData.arrived=false;});
+    list.forEach((p,i)=>setTimeout(()=>{ /* 一個接一個出發，看起來像在派工 */
+      if(MODE!=='line')return;
+      const u=p.userData;u.go=u.lineSlot.clone();
+      if(reduce){p.position.copy(u.lineSlot);p.rotation.y=0;}
+    },i*30));
+    camGo(new THREE.Vector3(0,0,66),new THREE.Vector3(0,52,112));
+  }else{
+    toast('💼 休息結束,回去幹活!');
+    people.forEach(p=>{p.userData.go=null;p.userData.target.copy(p.userData.home);});
+    setCam('iso',document.getElementById('bIso'));
+  }
+  document.querySelectorAll('.btn.game').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  if(m==='line'||m==='work'){try{localStorage.setItem('office3d.mode',m);}catch(e){}}
+}
+
+/* ── 三主題即時切換(🌙 午夜 → 📰 日報 → 🔥 地心)── */
+function applyTheme(name){
+  if(!THEMES[name])name='midnight';
+  const T=THEMES[name];
+  CUR=T;CUR_NAME=name;
+
+  /* 1) CSS 變數 */
+  const R=document.documentElement.style,C=T.css,U=T.ui;
+  R.setProperty('--bg',C.bg);R.setProperty('--panel',C.panel);
+  R.setProperty('--border',C.border);R.setProperty('--text',C.text);
+  R.setProperty('--accent',C.accent);R.setProperty('--gold',C.gold);
+  R.setProperty('--green',C.green);R.setProperty('--orange',C.orange);R.setProperty('--red',C.red);
+  R.setProperty('--font-pixel',T.font.pixel);
+  R.setProperty('--ui-bar-bg',U.barBg);R.setProperty('--ui-legend-bg',U.legendBg);
+  R.setProperty('--ui-info-bg',U.infoBg);R.setProperty('--ui-todo-bg',U.todoBg);
+  R.setProperty('--ui-hint',U.hint);R.setProperty('--ui-infotext',U.infoText);
+  R.setProperty('--hover-border',U.hoverBorder);R.setProperty('--hover-glow',U.hoverGlow);
+  R.setProperty('--btn-on-bg',U.btnOnBg);R.setProperty('--btn-on-border',U.btnOnBorder);R.setProperty('--btn-on-text',U.btnOnText);
+  R.setProperty('--gold-dim',U.goldDim);R.setProperty('--btn-game-on-text',U.btnGameOnText);
+  R.setProperty('--shadow-ink',U.shadowInk);R.setProperty('--title-shadow',U.titleShadow);
+  R.setProperty('--toast-bg',U.toastBg);R.setProperty('--toast-text',U.toastText);
+  R.setProperty('--toast-border',U.toastBorder);R.setProperty('--toast-shadow',U.toastShadow);
+  R.setProperty('--todo-row-bg',U.todoRowBg);R.setProperty('--todo-row-hover',U.todoRowHover);
+  R.setProperty('--fx-overlay',T.fx.overlay);
+  document.body.className='theme-'+name;
+
+  /* 2) 場景基礎 + 三盞燈 */
+  scene.background.setHex(T.scene.bg);
+  scene.fog.color.setHex(T.scene.fog);scene.fog.near=T.scene.fogNear;scene.fog.far=T.scene.fogFar;
+  amb.color.setHex(T.light.ambient);amb.intensity=T.light.ambientI;
+  dir.color.setHex(T.light.dir);dir.intensity=T.light.dirI;
+  pt.color.setHex(T.light.point);pt.intensity=T.light.pointI;pt.distance=T.light.pointDist;
+  REG.ground.color.setHex(T.ground.floor);
+
+  /* 3) GridHelper 顏色是頂點色 → 移除舊的、dispose、重建 */
+  scene.remove(REG.grid);
+  REG.grid.geometry.dispose();REG.grid.material.dispose();
+  REG.grid=new THREE.GridHelper(200,100,T.grid.main,T.grid.sub);
+  REG.grid.position.y=0;scene.add(REG.grid);
+
+  /* 4) ZONES tone/color 全域更新(聚光/legend/名牌共用來源)+ 地板 + 矮牆 */
+  Object.keys(ZONES).forEach(id=>{
+    const zt=T.zone[id];if(!zt)return;
+    ZONES[id].color=zt.color;ZONES[id].tone=zt.tone;
+    if(REG.zoneFloor[id])REG.zoneFloor[id].color.setHex(zt.color);
+  });
+  REG.wallMats.forEach(m=>m.color.setHex(T.scene.wall));
+
+  /* 5) 狀態燈三色全域更新(綠=運轉/橘=待命/灰=凍結 語意鎖死) */
+  STC.running=T.lamp.running;STC.standby=T.lamp.standby;STC.frozen=T.lamp.frozen;
+
+  /* 6) 家具 */
+  const F=REG.furniture,FT=T.furniture;
+  F.warTable.color.setHex(FT.warTable);
+  F.warGlow.color.setHex(FT.warGlow);
+  F.warScreen.color.setHex(FT.warScreen);
+  F.warScreen.emissive.setHex(FT.warScreenEmis);F.warScreen.emissiveIntensity=FT.warScreenEmisI;
+  F.coffee.color.setHex(FT.coffee);F.coffee.emissive.setHex(FT.coffeeEmis);F.coffee.emissiveIntensity=FT.coffeeEmisI;
+  F.vending.color.setHex(FT.vending);F.vending.emissive.setHex(FT.vendingEmis);F.vending.emissiveIntensity=FT.vendingEmisI;
+  F.brkTops.forEach(m=>m.color.setHex(FT.tableTop));
+  F.brkLegs.forEach(m=>m.color.setHex(FT.tableLeg));
+
+  /* 7) 桌子(桌板/腳/螢幕;emissive 跟新 zone tone) */
+  REG.desks.forEach(d=>{
+    d.top.color.setHex(T.desk.top);d.leg.color.setHex(T.desk.leg);
+    d.mon.color.setHex(T.desk.screen);
+    d.mon.emissive.set(ZONES[d.zoneId].tone);
+    d.mon.emissiveIntensity=T.desk.screenEmisI;
+  });
+
+  /* 8) 小人部位 + 名牌重烤（含產線分身） */
+  people.concat(DL.clones).forEach(p=>{
+    const u=p.userData,m=u.mats;
+    if(u.capM){u.capM.color.set(u.zone.tone);u.capM.color.multiplyScalar(.75);}
+    m.body.color.set(u.zone.tone);
+    m.arm.color.set(u.zone.tone);m.arm.color.multiplyScalar(.75);
+    if(u.look)lookRetheme(p);
+    else{
+      m.skin.color.setHex(T.person.skin);
+      m.hair.color.setHex(u.isCEO?T.person.hairCEO:T.person.hair);
+    }
+    m.eye.color.setHex(T.person.eye);
+    m.leg.color.setHex(T.person.leg);
+    m.lamp.color.setHex(STC[u.st]||STC.running);
+    if(m.crown){m.crown.color.setHex(T.person.hairCEO);m.crown.emissive.setHex(T.person.hairCEO);}
+    rebuildPersonLabel(p);
+  });
+
+  /* 9) 房名牌重烤 + legend inline 色塊重繪 */
+  rebuildZoneLabels();
+  renderLegend();
+
+  /* 10) 聚光進行中:chip 用新主題重生成、暗化重套(冪等) */
+  if(spotProj){
+    const set=new Set(spotProj.agents||[]);
+    people.forEach(p=>{
+      const code=p.userData.agent&&p.userData.agent.code;
+      if(set.has(code)){removeChip(p);addChip(p,spotProj.name);}
+      else setPersonDim(p,true);
+    });
+  }
+
+  /* 11) 收尾:按鈕文字 + 記住選擇 */
+  const tb=document.getElementById('bTheme');
+  if(tb)tb.textContent=THEME_BTN[name];
+  try{localStorage.setItem('office3d.theme',name);}catch(e){}
+}
+function cycleTheme(){
+  const i=THEME_ORDER.indexOf(CUR_NAME);
+  applyTheme(THEME_ORDER[(i+1)%THEME_ORDER.length]);
+}
+/* 載入上次選擇(預設 midnight;midnight token=現況硬編碼值,套用等於 no-op) */
+let savedTheme=null;
+try{savedTheme=localStorage.getItem('office3d.theme');}catch(e){}
+applyTheme(savedTheme||'midnight');
+/* 主題字型到位後重烤一次名牌(避免切到 Syne/Silkscreen 時 canvas 用到 fallback) */
+if(document.fonts&&document.fonts.load){
+  Promise.all([
+    document.fonts.load("800 16px Syne"),
+    document.fonts.load("700 16px Silkscreen"),
+    document.fonts.load("900 16px 'Noto Sans TC'")
+  ]).then(()=>{rebuildZoneLabels();people.forEach(rebuildPersonLabel);}).catch(()=>{});
+}
+
+/* ── 動畫:idle 呼吸 + 房間內漫步 ── */
+const clock=new THREE.Clock();
+/* ?rec=1920|1280：錄影模式把畫布鎖在 16:9 固定解析度（字級規格才成立，SPEC §4.2） */
+const REC_Q=+new URLSearchParams(location.search).get('rec');
+const REC_W=(REC_Q===1280||REC_Q===1920)?REC_Q:0;
+function resize(){
+  const w=REC_W||innerWidth,h=REC_W?Math.round(REC_W*9/16):innerHeight;
+  renderer.setSize(w,h,false);
+  if(REC_W){canvas.style.inset='auto';canvas.style.left='0';canvas.style.top='0';canvas.style.width=w+'px';canvas.style.height=h+'px';
+    const de=document.documentElement.style,bd=document.body.style;
+    de.width=bd.width=w+'px';de.height=bd.height=h+'px';de.overflow=bd.overflow='hidden';
+    bd.transform='translateZ(0)'; /* body 成為 position:fixed 後代的包含塊，HUD 才會貼在 W×H 內 */
+    if(innerWidth!==w||innerHeight!==h)console.warn('REC 建議視窗剛好 '+w+'×'+h+'，目前 '+innerWidth+'×'+innerHeight);}
+  camera.aspect=w/h;camera.updateProjectionMatrix();
+}
+addEventListener('resize',resize);resize();
+
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+let rafAlive=false;
+function tick(t){
+  rafAlive=true;
+  requestAnimationFrame(tick);
+  step(t);
+}
+function step(t){
+  const et=clock.getElapsedTime();
+  if(camTween)camTween(t);
+  { /* 平移邊界：超出就把相機跟視角中心一起拉回來 */
+    const tg=controls.target,bx=THREE.MathUtils.clamp(tg.x,PAN_BOUNDS.x0,PAN_BOUNDS.x1),bz=THREE.MathUtils.clamp(tg.z,PAN_BOUNDS.z0,PAN_BOUNDS.z1);
+    if(bx!==tg.x||bz!==tg.z){camera.position.x+=bx-tg.x;camera.position.z+=bz-tg.z;tg.x=bx;tg.z=bz;}
+  }
+  controls.update();
+  /* 分身只在本尊不在崗位上時出現：上產線時本尊站在那裡；離開產線後本尊走開了才換分身（規格審：不准兩個疊在一起） */
+  for(const c of DL.clones){
+    if(MODE==='line'){c.visible=false;continue;}
+    if(!reduce)dlAnimate(c,et); /* 先算分身此刻站哪，再判斷會不會跟本尊疊在一起；藏著的分身也要算，不然比到的是它上次露面的位置 */
+    const o=c.userData.orig.position;c.visible=Math.hypot(o.x-c.position.x,o.z-c.position.z)>1.2;
+  }
+  if(!reduce){
+    DL.clones.forEach(c=>{if(!c.visible)return;const u=c.userData;u.parts.head.position.y=(u.headY||1.5)+Math.sin(et*3+u.phase)*.04;});
+    people.forEach(p=>{
+      const u=p.userData;
+      // idle bob
+      u.parts.head.position.y=(u.headY||1.5)+Math.sin(et*3+u.phase)*.04; // head（有造型的人頭髮、眼鏡都掛在頭上，一起動）
+      p.position.y=Math.abs(Math.sin(et*4+u.phase))*.03;
+      // 移動(凍結部門的人不動;依模式決定目的地)
+      if(u.st==='frozen')return;
+      let goal;
+      if(MODE==='work'||!u.go){
+        u.wait--;
+        if(u.wait<=0){
+          const z=u.zone,r=u.isCEO?1.2:2.2;
+          u.target.set(
+            THREE.MathUtils.clamp(u.home.x+(Math.random()*2-1)*r,z.x0+1,z.x1-1),0,
+            THREE.MathUtils.clamp(u.home.z+(Math.random()*2-1)*r,z.z0+1,z.z1-1));
+          u.wait=200+Math.random()*500;
+        }
+        goal=u.target;
+      }else{
+        goal=u.go;
+        if(MODE==='break'){ // 茶水間內繼續閒晃
+          u.wait--;
+          if(u.wait<=0){u.go=randIn(ZONES.brk);u.wait=150+Math.random()*350;}
+        }
+      }
+      const dx=goal.x-p.position.x,dz=goal.z-p.position.z;
+      const dist=Math.hypot(dx,dz);
+      const spd=(MODE==='work')?u.speed*2:u.speed*5; // 董事長一喊,腳步加快
+      if(MODE==='line'&&u.arrived){
+        dlAnimate(p,et); /* 到位後跟分身走同一套：在座位工作、輪到就走去輸送帶再回來 */
+      }else if(dist>.08){
+        p.position.x+=dx*spd;p.position.z+=dz*spd;
+        p.rotation.y=Math.atan2(dx,dz)+Math.PI; // 臉朝 -z,轉向移動方向
+      }else if(MODE==='line'&&u.go){
+        p.rotation.y=0; /* 面向輸送帶 */
+        if(u.arms){const k=Math.sin(et*11+u.phase)*.38;u.arms[0].rotation.x=k;u.arms[1].rotation.x=-k;}
+        /* 輪到他離座的那幾秒先不接手，不然會從座位直接跳到路線中段（規範審 2026-11-12）；最多多站 7 秒 */
+        if(!u.arrived&&dlPose(u,et).stage==='desk'){u.arrived=true;if(Math.random()<.3)bubble(p,'就位 '+u.lineStation.name);}
+      }else if(MODE==='meeting'&&u.go){
+        // 就座:員工面向大螢幕,CEO 面向群眾
+        const w=ZONES.war,cx=(w.x0+w.x1)/2;
+        const fp=u.isCEO?{x:cx,z:w.z0+6.5}:{x:cx,z:w.z0+.45};
+        p.rotation.y=Math.atan2(fp.x-p.position.x,fp.z-p.position.z)+Math.PI;
+      }
+      if(MODE!=='line'&&u.arms&&u.arms[0].rotation.x){u.arms[0].rotation.x=0;u.arms[1].rotation.x=0;}
+      // 隨機冒泡(開會認真、茶水間耍廢、產線上報工站)
+      if(MODE==='line'&&u.arrived&&et-lastBub>1.5&&Math.random()<.01){
+        lastBub=et;bubble(p,'⚙️ '+u.lineStation.name.replace(/[①-⑨]/g,''));
+      }else if(MODE==='meeting'&&dist<.5&&et-lastBub>1.3&&Math.random()<.02){
+        lastBub=et;bubble(p,MEET_TXT[Math.floor(Math.random()*MEET_TXT.length)]);
+      }else if(MODE==='break'&&et-lastBub>1.8&&Math.random()<.015){
+        lastBub=et;bubble(p,BRK_TXT[Math.floor(Math.random()*BRK_TXT.length)]);
+      }
+      // 狀態燈呼吸（聚光選中最強、green 專案較強、其餘一般）
+      u.lamp.material.opacity=1;
+      const amp = u.hl?0.6 : (u.hot?0.45:0.25);
+      u.lamp.scale.setScalar(1+Math.sin(et*3+u.phase)*amp);
+    });
+  }
+  if(!reduce){
+    const run=et*DL_BELT;
+    DL.belts.forEach(b=>{if(!b.live)return;
+      b.tex.offset.x=-(run/1.4%1); /* 紋路一格 1.4 單位，往最後一站的方向跑 */
+      b.lights.forEach((m,i)=>{const f=(run/b.bl+i/b.lights.length)%1;m.visible=true;m.position.x=b.bx0+f*b.bl;m.material.opacity=.8*Math.sin(Math.PI*f);});}); /* 兩端淡入淡出 */
+    DL.screens.forEach(s=>{s.m.emissiveIntensity=s.on?.55+.35*Math.sin(et*4+s.ph):.06;});
+  }
+  renderer.render(scene,camera);
+}
+requestAnimationFrame(tick);
+// 首幀同步畫一次（背景分頁 rAF 會被暫停，見 MERIDIAN 坑：改用 setTimeout 後備）
+step(performance.now());
+setTimeout(()=>{
+  if(!rafAlive){
+    setInterval(()=>{ if(!rafAlive) step(performance.now()); },50);
+  }
+},600);
+try{const q=new URLSearchParams(location.search);
+  if(!q.has('rec')&&!q.has('replay')){
+    const sm=q.get('mode')||localStorage.getItem('office3d.mode');
+    if(sm==='line')setTimeout(()=>setMode('line',document.getElementById('gLine')),700);
+  }}catch(e){}
+
+/* ── Jarvis 語音層接口：把辦公室能力匯出給 voice-overlay（存在才會用到）── */
+window.OFFICE_API={agentByCode,bubble,toast,spotlight,clearSpotlight,camGo,ZONES,people,projects:D.projects,
+  /* 出貨月台（dock-overlay.js / dock-3d.js）用 */
+  roster:ALL,THREE,scene,camera,controls,zoneLabels:REG.zoneLabel,
+  isBusy:()=>interacting||!!camTween||performance.now()-lastMove<120,isUserBusy:()=>interacting||!!camTween,theme:()=>CUR
+  /* 自動發文產線（line-3d.js / line-card.js）用 */
+  ,themeName:()=>CUR_NAME,label,person,addCap,lookRetheme,
+  lineCamActive:false};
+</script>
+<script>
+/* 動態 overlay bootstrap：只在 7860 模式下有後端；:3700 純展示版 404 → 靜默跳過。
+   語音 overlay 2026-07-31 依 James 指示先下線（voice-overlay.js 保留，要復活把下行解註解） */
+(async()=>{try{
+  // const v=await import('./voice-overlay.js'); await v.initVoiceOverlay(window.OFFICE_API);
+  const m=await import('./monitor-overlay.js');
+  await m.initMonitorOverlay(window.OFFICE_API);
+}catch(e){/* 純展示模式 */}})();
+/* 出貨月台：獨立載入，監控層壞了不影響它；後端沒起時它自己整層隱藏 */
+(async()=>{try{
+  const k=await import('./dock-overlay.js');
+  await k.initDockOverlay(window.OFFICE_API);
+}catch(e){console.warn('dock overlay 未載入',e);}})();
+/* 自動發文產線：獨立載入，月台或監控壞了不影響它；後端沒起時它自己整層隱藏 */
+(async()=>{try{
+  const l=await import('./line-card.js');
+  await l.initLine(window.OFFICE_API);
+}catch(e){console.warn('line 未載入',e);}})();
+</script>
+</body>
+</html>
