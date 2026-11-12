@@ -59,7 +59,7 @@ window.EMPIRE_DATA = {
         { code: "competitor-monitor", role: "競品監控員", frame: "—", note: "台灣同業 + 澳洲市場" },
         { code: "case-study-writer", role: "案例文章師", frame: "—", note: "B2B 開發案例" },
         { code: "report-builder", role: "報告整合員", frame: "—", note: "日報/週報彙整" },
-        { code: "prompt-enhancer", role: "指令優化師", frame: "提示工程指南", note: "口語→結構化 prompt" },
+        { code: "prompt-enhancer", role: "指令優化師", frame: "Anthropic", note: "口語→結構化 prompt" },
         { code: "marketing-team", role: "行銷團隊（總線）", frame: "—", note: "全元/YouTube/AIRA 內容產出" }
       ],
       note: "內容飛輪核心；YouTube 頻道是帝國引流母艦"
@@ -87,7 +87,7 @@ window.EMPIRE_DATA = {
       agents: [
         { code: "investment-longterm", role: "長線宏觀（必經關卡）", frame: "顛覆性創新", note: "⚠️ 顛覆性敘事審視" },
         { code: "investment-analyst", role: "首席分析師", frame: "—", note: "整合輸出日報" },
-        { code: "investment-daytrader", role: "日內交易師", frame: "DMC / SMC", note: "BTC/ETH Kill Zone" },
+        { code: "investment-daytrader", role: "日內交易師", frame: "DMC / 時段打法", note: "BTC/ETH Kill Zone" },
         { code: "investment-altcoin", role: "山寨幣獵人", frame: "—", note: "交易所新幣掃描" },
         { code: "investment-fx", role: "外匯連動分析師", frame: "—", note: "美元指數/宏觀" },
         { code: "investment-listing", role: "交易所新幣偵察員", frame: "—", note: "新幣熱度" },
@@ -102,7 +102,7 @@ window.EMPIRE_DATA = {
         { code: "swing-master", role: "波段交易大師", frame: "四層證據＋峰谷狀態機", note: "日線/4H 波段；日內大師姊妹位" },
         { code: "macro-cycle-officer", role: "長週期體制判定官", frame: "康波／債務長波", note: "預設「無法判定」；不做週期計數" },
         { code: "narrative-hunter", role: "敘事獵手", frame: "熱點→鏈上代幣", note: "四步；代幣真名解析最易錯" },
-        { code: "mispricing-hunter", role: "錯位定價獵手", frame: "社會套利", note: "三型 A看不到/B框架錯/C不信" },
+        { code: "mispricing-hunter", role: "錯位定價獵手", frame: "消費趨勢錯位", note: "三型 A看不到/B框架錯/C不信" },
         { code: "bottleneck-hunter", role: "瓶頸獵手", frame: "供應鏈瓶頸九步", note: "供應鏈瓶頸小型股；登記後才對答案" },
       ],
       note: "FOMO 水族館內容 + 訊號系統背後的大腦；OI 報單已驗證會賺"
@@ -112,10 +112,10 @@ window.EMPIRE_DATA = {
       statusLabel: "待命", accent: "#8B5CF6",
       skillCoverage: 0.6,
       agents: [
-        { code: "sales-closer", role: "銷售狙擊手", frame: "高價成交", note: "Grand Slam Offer·定價·成交話術·讓報價本身值得說是" },
+        { code: "sales-closer", role: "銷售狙擊手", frame: "高價成交", note: "超值報價設計·定價·成交話術·讓報價本身值得說是" },
         { code: "email-outreach", role: "開發信撰寫師", frame: "成交框架", note: "B2B 陌生開發信" },
-        { code: "network-architect", role: "人際網絡師", frame: "關係資本", note: "關係資本" },
-        { code: "growth-hacker", role: "成長駭客", frame: "增長駭客", note: "增長飛輪/A-B 測試" },
+        { code: "network-architect", role: "人際網絡師", frame: "人脈經營", note: "關係資本" },
+        { code: "growth-hacker", role: "成長駭客", frame: "增長實驗", note: "增長飛輪/A-B 測試" },
         { code: "community-builder", role: "社群建造者", frame: "社群經營", note: "FOMO 社群結構" },
         { code: "case-study-writer", role: "案例文章師", frame: "—", note: "共用" },
         { code: "crm-manager", role: "CRM 管線管理師", frame: "—", note: "NocoDB CRM base＋n8n 每日 09:00 跟進提醒；成交前管線" },
@@ -125,14 +125,14 @@ window.EMPIRE_DATA = {
         { code: "sales-opportunity", role: "商機評估", frame: "—", note: "銷售研究五件組" },
         { code: "sales-strategy", role: "銷售策略", frame: "—", note: "銷售研究五件組" }
       ],
-      note: "pipeline 目前近乎枯竭（牙醫/蘇董/格棋/信義全斷）—— 待重啟開發"
+      note: "pipeline 目前近乎枯竭（牙醫/某董事長/格棋/信義全斷）—— 待重啟開發"
     },
     {
       id: "brand", name: "品牌 + 內容", head: "品牌哲學 · 故事敘事", icon: "🔮", status: "running",
       statusLabel: "運轉中", accent: "#06B6D4",
       skillCoverage: 0.75,
       agents: [
-        { code: "media-director", role: "自媒體總監", frame: "一人品牌方法論", note: "跨品牌內容戰略軍師＋審稿（造王者/YouTube/FOMO）；161 支影片知識庫" },
+        { code: "media-director", role: "自媒體總監", frame: "一人品牌方法論", note: "跨品牌內容戰略軍師＋審稿（造王者/YouTube/FOMO）；影片知識庫" },
         { code: "brand-philosopher", role: "個人品牌哲學家", frame: "長期主義", note: "Threads 深度貼文" },
         { code: "brand-storyteller", role: "品牌敘事師", frame: "故事品牌框架", note: "銷售頁文案" },
         { code: "content-director", role: "內容導演", frame: "爆款結構", note: "選題/縮圖/鉤子" },
@@ -166,28 +166,28 @@ window.EMPIRE_DATA = {
   // ── 個人知識顧問 ──
   personal: [
     { code: "research-scholar", name: "學術文獻研究員", frame: "OpenAlex/PubMed", note: "找論文查實證；OpenAlex·Unpaywall·arXiv·Europe PMC·PubMed 全免費合法" },
-    { code: "us-supply-advisor", name: "美股供應鏈顧問", frame: "X 推文存檔＋AI 多空標註", note: "每句引述附原文連結；對公平對照組無顯著選股力（p≈0.08）；2026-10-04 新設", st: "running" },
+    { code: "us-supply-advisor", name: "美股供應鏈顧問", frame: "公開貼文存檔＋AI 多空標註", note: "每句引述附原文連結；2026-10-04 新設", st: "running" },
     { code: "senior-investment-advisor", name: "資深投資顧問", frame: "金融史事件研究", note: "22 條序列＋35 事件；數字當場算", st: "running" },
-    { code: "tw-stock-advisor", name: "台股顧問", frame: "台股・1198 支逐字稿", note: "每句引述跑檢索拿原話", st: "running" },
-    { code: "futures-advisor", name: "合約打法顧問", frame: "SMC/SNR・514 支", note: "加密合約外部打法研究", st: "running" },
-    { code: "range-advisor", name: "箱體打法顧問", frame: "箱體中軸線・163 支", note: "主動校正打法歸類", st: "running" },
-    { code: "intraday-advisor", name: "日內打法顧問", frame: "雙來源交叉・863 支", note: "獨門：量化教學 vs 實戰言行落差", st: "running" }
+    { code: "tw-stock-advisor", name: "台股顧問", frame: "台股・逐字稿資料庫", note: "每句引述跑檢索拿原話", st: "running" },
+    { code: "futures-advisor", name: "合約打法顧問", frame: "SMC/SNR・逐字稿資料庫", note: "加密合約外部打法研究", st: "running" },
+    { code: "range-advisor", name: "箱體打法顧問", frame: "箱體打法・逐字稿資料庫", note: "主動校正打法歸類", st: "running" },
+    { code: "intraday-advisor", name: "日內打法顧問", frame: "雙來源交叉", note: "獨門：量化教學 vs 實戰言行落差", st: "running" }
   ],
 
   // ── 產品線 Pipeline（誠實分級，反映 2026-07 現況）──
   pipeline: [
-    { name: "全元科技顧問", tier: "green", model: "年收 2% + 0.01%", path: "enterprise-automation-deploy", note: "🟢 全力推進" },
-    { name: "合力乒乓 WebApp", tier: "green", model: "NT$50,000 建置中", path: "合力乒乓專案", note: "🟢 做完即空，pipeline 見底" },
-    { name: "YouTube 頻道", tier: "green", model: "內容飛輪", path: "Trump", note: "🟢 引流母艦" },
-    { name: "造王者內容引擎", tier: "green", model: "AI 員工變現", path: "ai-tool-scout / brand-machine", note: "🟢 逆天改命戰略主軸" },
-    { name: "FOMO 水族館", tier: "yellow", model: "NT$980/月 · 90天觀察", path: "Trump", note: "🟡 最低投入" },
+    { name: "全元科技顧問", tier: "green", model: "年收 2% + 0.01%", path: "—", note: "🟢 全力推進" },
+    { name: "合力乒乓 WebApp", tier: "green", model: "NT$50,000 建置中", path: "—", note: "🟢 做完即空，pipeline 見底" },
+    { name: "YouTube 頻道", tier: "green", model: "內容飛輪", path: "—", note: "🟢 引流母艦" },
+    { name: "造王者內容引擎", tier: "green", model: "AI 員工變現", path: "—", note: "🟢 逆天改命戰略主軸" },
+    { name: "FOMO 水族館", tier: "yellow", model: "NT$980/月 · 90天觀察", path: "—", note: "🟡 最低投入" },
     { name: "AIRA 邊緣 AI 引介", tier: "yellow", model: "成交抽 10%", path: "—", note: "🟡 被動等待" },
     { name: "AI 課程 / Skool / 澳洲 B2B", tier: "frozen", model: "等 YouTube 月均 5萬觀看", path: "—", note: "❄️ 冰凍" },
-    { name: "牙醫 / 蘇董 / 格棋 / 信義", tier: "frozen", model: "B2B 案源", path: "各專案", note: "❄️ 2026-07 全斷" },
-    { name: "HelpMe 醫療", tier: "dormant", model: "LINE Bot + Retell", path: "HelpMe", note: "💤 未激活" },
-    { name: "CycleNav 投資 WebApp", tier: "dormant", model: "康波週期", path: "TradingView", note: "💤 未激活" },
-    { name: "LevelMEUp", tier: "dormant", model: "遊戲化人生 RPG", path: "LevelMEUp", note: "💤 未激活" },
-    { name: "Soul Architect", tier: "dormant", model: "數位遺產", path: "SoulArchitect", note: "💤 未激活" }
+    { name: "牙醫 / 某董事長 / 格棋 / 信義", tier: "frozen", model: "B2B 案源", path: "—", note: "❄️ 2026-07 全斷" },
+    { name: "HelpMe 醫療", tier: "dormant", model: "LINE Bot + Retell", path: "—", note: "💤 未激活" },
+    { name: "CycleNav 投資 WebApp", tier: "dormant", model: "康波週期", path: "—", note: "💤 未激活" },
+    { name: "LevelMEUp", tier: "dormant", model: "遊戲化人生 RPG", path: "—", note: "💤 未激活" },
+    { name: "Soul Architect", tier: "dormant", model: "數位遺產", path: "—", note: "💤 未激活" }
   ],
 
   // ── 專案 ↔ 用到哪些人 ↔ 待辦 ↔ 等 James 決定（來源：記憶系統）──

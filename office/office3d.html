@@ -479,23 +479,22 @@ const LOOKS={
   Jassy:  {body:'M',face:'round', skin:'honey',    hair:'H3',hairColor:'ink',   outfit:'G5',acc:['bowtie','smile','blush']},
   Cook:   {body:'M',bw:.54,face:'small',skin:'porcelain',hair:'H2',hairColor:'brown',outfit:'G3',acc:['headphones']}
 };
-/* 以真人命名、性別明確的角色固定性別表現；其他人由代號決定，大約一半一半 */
+/* 部分角色固定性別表現；其他人由代號決定，大約一半一半 */
 const LOOK_GENDER={'investment-longterm':'f','brand-philosopher':'m','brand-storyteller':'m','content-director':'m','product-wizard':'m','sales-closer':'m',
   'network-architect':'m','growth-hacker':'m','community-builder':'m','media-director':'m','tw-stock-advisor':'m',
   'us-supply-advisor':'f','range-advisor':'m','futures-advisor':'m'};
 const LOOK_SIGS=new Set(Object.values(LOOKS).map(l=>[l.hair,l.hairColor,l.outfit,l.body,l.face].join('|')));
 const LOOK_DEPT_HAIR={}; /* 部門|髮色 → 人數 */
 const LOOK_CACHE={};     /* 代號 → 算出來的造型（本尊、部門產線分身、v1 產線分身共用同一份） */
-function lookRng(str,salt){ /* 代號 → 固定亂數序列；傳數字＝已經算好的雜湊（公開版改名的人用） */
-  let h=2166136261;if(typeof str==='number')h=str;else for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
+function lookRng(str,salt){ /* 代號 → 固定亂數序列 */
+  let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619);}
   let a=(h+salt*977)|0;
   return()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
 }
-const LOOK_SEED={'us-supply-advisor':-1223703981,'tw-stock-advisor':-1771812864,'futures-advisor':-407828791,'range-advisor':111669629,'intraday-advisor':1725531710,'investment-longterm':-1727591515,'investment-listing':-1480397532,'mispricing-hunter':1924843129,'media-director':1690523903,'sales-closer':-155971708,'network-architect':-1976113356,'growth-hacker':-487652708,'community-builder':-356244690,'brand-philosopher':268231135,'brand-storyteller':2089175445,'content-director':1078187297,'product-wizard':-1082941501,'chart-analyst':1880578565}; /* 公開版改名的人：沿用改名前的造型 */
 function lookGen(agent){
   let look=null;
   for(let n=0;n<24;n++){ /* 撞到別人的整套造型、或同部門這個髮色已經 3 人，就換一組；最多試 24 次（第 12 次起不再管髮色人數） */
-    const r=lookRng(LOOK_SEED[agent.code]??agent.code,n),pick=a=>a[Math.floor(r()*a.length)],chance=p=>r()<p;
+    const r=lookRng(agent.code,n),pick=a=>a[Math.floor(r()*a.length)],chance=p=>r()<p;
     const coin=r()<.5?'f':'m',f=(LOOK_GENDER[agent.code]||coin)==='f';
     const skin=pick(['porcelain','apricot','apricot','wheat','wheat','honey','deep']);
     let colors=skin==='deep'?['auburn','silver','flax','berry','brown']:['ink','ink','brown','brown','auburn','flax','silver','berry'];

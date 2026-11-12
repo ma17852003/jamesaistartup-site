@@ -849,7 +849,9 @@ export function initLine3D(office, opts = {}) {
     ticketX: did => tickets.get(did)?.x,
     staffCount: () => stations.reduce((n, s) => n + (s.staff ? s.staff.length : 0), 0),
     staffOn: no => stations.filter(s => s.staff && s.staff.some(sf => sf.no === no)).length,
-    armRot: () => stations.flatMap(s => (s.staff || []).flatMap(sf => sf.arms.map(a => a.rotation.x))),
+    armRot: no => stations.flatMap(s => (s.staff || []).filter(sf => !no || sf.no === no).flatMap(sf => sf.arms.map(a => a.rotation.x))),
+    staffScreen: (no, i) => { const sf = stations[i].staff.find(x => x.no === no); sf.p.updateMatrixWorld(true); // 分身胸口的螢幕座標（點選測試用）
+      const s = toScreen(sf.p.localToWorld(new T.Vector3(0, .9, 0))), r = canvasEl.getBoundingClientRect(); return { x: s.x + r.left, y: s.y + r.top }; },
     beltOffset: no => lines[no].beltMat.map.offset.x,
     bubbleText: no => lines[no].bubble?.userData.text ?? null,
     bubbleY: no => lines[no].bubble?.position.y,
